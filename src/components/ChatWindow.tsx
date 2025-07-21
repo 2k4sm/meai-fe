@@ -8,11 +8,10 @@ interface ChatWindowProps {
   onSidebarToggle?: () => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, onSidebarToggle }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId }) => {
   const {
     messages,
     loading,
-    error,
     streaming,
     fetchMessages,
     sendMessage,
@@ -55,7 +54,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, onSidebarToggle
           </div>
         ) : (
           <div className="flex flex-col space-y-5">
-            {messages.map((msg, index) => (
+            {messages.map((msg) => (
               <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[50%] mx-auto">
                 <MessageItem message={msg} status={msg.status} />
               </div>

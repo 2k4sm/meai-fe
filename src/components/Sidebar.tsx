@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useConversationStore } from '../stores/useConversationStore';
-import { FiTrash2, FiPlus, FiChevronLeft, FiChevronRight, FiMessageSquare } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiChevronLeft, FiMessageSquare } from 'react-icons/fi';
 import ChatWindow from './ChatWindow';
 import Navbar from './Navbar';
 import { useAuthStore } from '../stores/useAuthStore';
