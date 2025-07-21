@@ -1,7 +1,7 @@
 import React from 'react';
 import { login } from '../api/auth';
 import { FaGoogle } from 'react-icons/fa';
-import { FiMessageSquare } from 'react-icons/fi';
+import { RiMessage3Line } from 'react-icons/ri';
 
 const Login: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ const Login: React.FC = () => {
         <div className="relative bg-gray-900/80 border border-gray-800 shadow-2xl rounded-2xl p-8 flex flex-col items-center">
           <div className="flex flex-col items-center gap-3 mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl">
-              <FiMessageSquare className="text-white w-8 h-8" />
+              <RiMessage3Line className="text-white w-8 h-8" />
             </div>
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white mb-2">meAI</h1>
