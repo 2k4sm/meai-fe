@@ -11,6 +11,7 @@ interface MessageItemProps {
 const MessageItem = ({ message, status }: MessageItemProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isUser = message.type === 'Human';
+  const effectiveStatus = status || message.status;
 
   useEffect(() => {
     if (contentRef.current) {
@@ -20,11 +21,11 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
   }, [message.content]);
 
   let statusIndicator = null;
-  if (status === "pending") {
+  if (effectiveStatus === "pending") {
     statusIndicator = (
       <span className="ml-2 text-xs text-yellow-400 animate-pulse">Sending...</span>
     );
-  } else if (status === "failed") {
+  } else if (effectiveStatus === "failed") {
     statusIndicator = (
       <span className="ml-2 text-xs text-red-500">Failed to send</span>
     );
@@ -32,7 +33,7 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
 
   if (isUser) {
     return (
-      <div className={`w-full flex justify-end my-6 ${status === "pending" ? "opacity-60" : ""}`}>
+      <div className={`w-full flex justify-end my-6 ${effectiveStatus === "pending" ? "opacity-60" : ""}`}>
         <div className="inline-flex px-3 py-2 rounded-lg bg-cyan-950 backdrop-blur-3xl items-center max-w-[80vw] md:max-w-[60%] overflow-x-auto">
           <div
             ref={contentRef}

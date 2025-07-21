@@ -34,19 +34,30 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
   },
 
   deleteMessage: async (conversationId, messageId) => {
+    const prevMessages = get().messages;
+    set(state => ({ messages: state.messages.filter(m => m.message_id !== messageId) }));
     try {
       await apiDeleteMessage(conversationId, messageId);
-      set(state => ({ messages: state.messages.filter(m => m.message_id !== messageId) }));
     } catch (err: any) {
-      set({ error: err.message || 'Failed to delete message' });
+      set({ messages: prevMessages, error: err.message || 'Failed to delete message' });
     }
   },
 
   sendMessage: (content) => {
     const ws = get().ws;
     if (ws && ws.readyState === WebSocket.OPEN) {
+      const conversationId = get().messages[0]?.conversation_id || 0;
+      const pendingMsg = {
+        message_id: -Date.now(),
+        conversation_id: conversationId,
+        user_id: 0,
+        type: 'Human' as 'Human',
+        content,
+        created_at: new Date().toISOString(),
+        status: 'pending' as 'pending',
+      };
+      set(state => ({ messages: [...state.messages, pendingMsg], streaming: true }));
       ws.send(JSON.stringify({ content }));
-      set({ streaming: true });
     }
   },
 
@@ -60,21 +71,48 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       try {
         const data = JSON.parse(event.data);
         if (data.last_chunk) {
-          set({ streaming: false });
+          set(state => {
+            const messages = [...state.messages];
+            if (
+              messages.length > 0 &&
+              messages[messages.length - 1].type === 'AI' &&
+              messages[messages.length - 1].status === 'pending'
+            ) {
+              delete messages[messages.length - 1].status;
+            }
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i].type === 'Human' && messages[i].status === 'pending') {
+                delete messages[i].status;
+                break;
+              }
+            }
+            return { messages, streaming: false };
+          });
         } else if (data.role && data.content !== undefined) {
-          set(state => ({
-            messages: [
-              ...state.messages,
-              {
+          set(state => {
+            const messages = [...state.messages];
+            if (
+              messages.length > 0 &&
+              messages[messages.length - 1].type === 'AI' &&
+              state.streaming
+            ) {
+              messages[messages.length - 1] = {
+                ...messages[messages.length - 1],
+                content: messages[messages.length - 1].content + data.content,
+              };
+            } else {
+              messages.push({
                 message_id: Date.now(),
                 conversation_id: conversationId,
                 user_id: 0,
-                type: data.role === 'assistant' ? 'AI' : 'TOOL',
+                type: (data.role === 'assistant' ? 'AI' : 'TOOL') as 'AI' | 'TOOL',
                 content: data.content,
                 created_at: new Date().toISOString(),
-              },
-            ],
-          }));
+                ...(data.role === 'assistant' ? { status: 'pending' as 'pending' } : {}),
+              });
+            }
+            return { messages };
+          });
         }
       } catch (e) {
         // Ignore parse errors  

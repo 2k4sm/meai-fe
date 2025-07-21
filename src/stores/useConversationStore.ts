@@ -41,29 +41,51 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
   },
   createConversation: async (title: string) => {
     set({ loading: true, error: null });
+    const tempId = -Date.now();
+    const tempConvo = {
+      conversation_id: tempId,
+      user_id: 0,
+      title,
+      summary_text: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    set((state) => ({
+      conversations: [tempConvo, ...state.conversations],
+      selectedConversation: tempConvo,
+      loading: true,
+    }));
     try {
       const convo = await apiCreateConversation(title);
       set((state) => ({
-        conversations: [convo, ...state.conversations],
-        loading: false,
+        conversations: [convo, ...state.conversations.filter(c => c.conversation_id !== tempId)],
         selectedConversation: convo,
+        loading: false,
       }));
     } catch (err: any) {
-      set({ error: err?.detail || 'Failed to create conversation', loading: false });
+      set((state) => ({
+        conversations: state.conversations.filter(c => c.conversation_id !== tempId),
+        error: err?.detail || 'Failed to create conversation',
+        loading: false,
+        selectedConversation: state.selectedConversation?.conversation_id === tempId ? null : state.selectedConversation,
+      }));
     }
   },
   deleteConversation: async (id: number) => {
-    set({ loading: true, error: null });
+    const prevConvos = get().conversations;
+    const prevSelected = get().selectedConversation;
+    set((state) => {
+      const conversations = state.conversations.filter((c) => c.conversation_id !== id);
+      const selectedConversation =
+        state.selectedConversation?.conversation_id === id ? null : state.selectedConversation;
+      return { conversations, selectedConversation, loading: true, error: null };
+    });
     try {
       await apiDeleteConversation(id);
-      set((state) => {
-        const conversations = state.conversations.filter((c) => c.conversation_id !== id);
-        const selectedConversation =
-          state.selectedConversation?.conversation_id === id ? null : state.selectedConversation;
-        return { conversations, loading: false, selectedConversation };
-      });
+      set({ loading: false });
     } catch (err: any) {
-      set({ error: err?.detail || 'Failed to delete conversation', loading: false });
+      // Revert on failure
+      set({ conversations: prevConvos, selectedConversation: prevSelected, error: err?.detail || 'Failed to delete conversation', loading: false });
     }
   },
   selectConversation: (convo: Conversation) => set({ selectedConversation: convo }),

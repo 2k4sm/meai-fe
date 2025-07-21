@@ -57,7 +57,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, onSidebarToggle
           <div className="flex flex-col space-y-5">
             {messages.map((msg, index) => (
               <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[50%] mx-auto">
-                <MessageItem message={msg} />
+                <MessageItem message={msg} status={msg.status} />
               </div>
             ))}
 

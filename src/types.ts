@@ -5,4 +5,5 @@ export interface Message {
   type: 'Human' | 'AI' | 'TOOL';
   content: string;
   created_at: string;
+  status?: 'pending' | 'failed';
 } 
