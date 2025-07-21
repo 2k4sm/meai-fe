@@ -16,9 +16,4 @@ export async function deleteMessage(conversationId: number, messageId: number): 
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to delete message');
-}
-
-export function createMessageStream(conversationId: number): WebSocket {
-  const wsUrl = API_BASE_URL.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:') + `/conversations/${conversationId}/stream`;
-  return new WebSocket(wsUrl);
 } 

@@ -20,16 +20,7 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
     }
   }, [message.content]);
 
-  let statusIndicator = null;
-  if (effectiveStatus === "pending") {
-    statusIndicator = (
-      <span className="ml-2 text-xs text-yellow-400 animate-pulse">Sending...</span>
-    );
-  } else if (effectiveStatus === "failed") {
-    statusIndicator = (
-      <span className="ml-2 text-xs text-red-500">Failed to send</span>
-    );
-  }
+
 
   if (isUser) {
     return (
@@ -40,7 +31,6 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
             className="break-words overflow-wrap-anywhere leading-relaxed text-white text-right"
             style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
           ></div>
-          {statusIndicator}
         </div>
       </div>
     );
@@ -54,7 +44,6 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
           className="prose prose-invert max-w-none text-left break-words overflow-wrap-anywhere leading-relaxed text-gray-300 mb-3 flex items-center"
           style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
         ></div>
-        {statusIndicator}
       </div>
     </div>
   );
