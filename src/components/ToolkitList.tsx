@@ -29,7 +29,7 @@ export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover
   }, [pendingConnections, syncConnectionPeriodically]);
 
   return (
-    <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-[5px] shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 w-full flex flex-col items-center h-fit" >
+    <div className="bg-[#2A2E24]/5 backdrop-blur-xl rounded-3xl p-[5px] shadow-[0_0_14px_rgba(236,223,204,0.1)] border border-[#697565]/10 w-full flex flex-col items-center h-fit" >
       <div className="w-full flex flex-row items-center overflow-x-auto overflow-visible z-50 h-fit pt-2">
         {toolkits.map((slug) => {
           const connection = connections.find(c => c.toolkit_slug === slug);

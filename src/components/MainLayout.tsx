@@ -5,7 +5,7 @@ import { useConversationStore } from '../stores/useConversationStore';
 import { useMessagesStore } from '../stores/useMessagesStore';
 
 const MainLayout: React.FC = () => {
-  const { selectedConversation, selectConversation, createConversation } = useConversationStore();
+  const { selectedConversation, selectConversation, createConversation, updateConversationTitle } = useConversationStore();
   const { sendMessage, fetchMessages, connectStream } = useMessagesStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -22,14 +22,16 @@ const MainLayout: React.FC = () => {
       await fetchMessages(convo.conversation_id);
       connectStream(convo.conversation_id);
       sendMessage(convo.conversation_id, input);
+      // Update the conversation title to the first user message
+      await updateConversationTitle(convo.conversation_id, input);
     }
   };
 
   return (
-    <div className="h-screen w-full flex bg-gradient-to-br from-gray-900 via-gray-950 to-black relative">
+    <div className="h-screen w-full flex bg-[#181C14] relative">
       {!sidebarOpen && (
         <button
-          className="fixed top-4 left-4 z-30 lg:hidden bg-gray-800/80 text-blue-400 hover:text-white p-2 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="fixed top-4 left-4 z-30 lg:hidden bg-[#3C3D37]/80 text-[#ECDFCC] hover:text-[#D4C5B3] p-2 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-[#697565]"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
         >

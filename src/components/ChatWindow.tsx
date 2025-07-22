@@ -51,11 +51,11 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
   };
 
   return (
-    <div className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 shadow-inner relative pt-20 w-full h-full lg:w-full lg:h-full">
+    <div className="flex-1 bg-[#181C14] shadow-inner relative pt-20 w-full h-full lg:w-full lg:h-full">
       <div className="p-4 overflow-y-auto h-full">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-300">
-            <p className="text-xl font-medium text-slate-200 mb-2 backdrop-blur-sm bg-black/50 px-4 py-2 rounded-lg shadow-sm">
+          <div className="flex flex-col items-center justify-center h-full text-[#D4C5B3]">
+            <p className="text-xl font-medium text-[#ECDFCC] mb-2 backdrop-blur-sm bg-[#2A2E24]/50 px-4 py-2 rounded-lg shadow-sm">
               Start a conversation
             </p>
           </div>
@@ -72,9 +72,9 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
                 <div className="w-full flex justify-start my-2">
                   <div className="inline-flex flex-col items-start text-left">
                     <div className="flex space-x-4 py-4">
-                      <span className="block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
-                      <span className="block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                      <span className="block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                      <span className="block w-2 h-2 bg-[#697565] rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
+                      <span className="block w-2 h-2 bg-[#697565] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                      <span className="block w-2 h-2 bg-[#697565] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
                     </div>
                   </div>
                 </div>

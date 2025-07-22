@@ -5,24 +5,24 @@ import { RiMessage3Line } from 'react-icons/ri';
 
 const Login: React.FC = () => {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#181C14] p-4">
       <div className="w-full max-w-md relative">
-        <div className="absolute inset-0 bg-blue-500/5 rounded-2xl backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-[#697565]/5 rounded-2xl backdrop-blur-sm" />
         
-        <div className="relative bg-gray-900/80 border border-gray-800 shadow-2xl rounded-2xl p-8 flex flex-col items-center">
+        <div className="relative bg-[#2A2E24]/80 border border-[#4D5147] shadow-2xl rounded-2xl p-8 flex flex-col items-center">
           <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl">
-              <RiMessage3Line className="text-white w-8 h-8" />
+            <div className="w-16 h-16 bg-gradient-to-br from-[#697565] to-[#3C3D37] rounded-2xl flex items-center justify-center shadow-xl">
+              <RiMessage3Line className="text-[#ECDFCC] w-8 h-8 drop-shadow-[0_0_8px_rgba(236,223,204,0.3)]" />
             </div>
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-white mb-2">meAI</h1>
-              <p className="text-gray-400 text-sm">Your AI-powered personal assistant</p>
+              <h1 className="text-3xl font-bold text-[#ECDFCC] mb-2 drop-shadow-[0_0_8px_rgba(236,223,204,0.2)]">meAI</h1>
+              <p className="text-[#D4C5B3] text-sm">Your AI-powered personal assistant</p>
             </div>
           </div>
 
           <button
             onClick={login}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl text-lg font-medium text-white transition-all duration-200 border border-gray-700 hover:border-blue-500 shadow-lg group"
+            className="w-full flex items-center justify-center gap-4 px-4 py-2.5 bg-[#2A2E24] hover:bg-[#3C3D37] rounded-xl text-[#ECDFCC] transition-all duration-300 border border-[#697565]/30 hover:border-[#697565] shadow-lg hover:shadow-[0_0_25px_rgba(105,117,101,0.2)] group relative overflow-hidden"
           >
             <FaGoogle className="text-xl text-blue-400 group-hover:text-blue-300" />
             <span>Sign in with Google</span>

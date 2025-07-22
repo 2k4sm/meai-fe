@@ -26,4 +26,15 @@ export async function deleteConversation(conversationId: number) {
   });
   if (!res.ok) throw await res.json();
   return res.json();
+}
+
+export async function updateConversationTitle(conversationId: number, title: string) {
+  const res = await fetch(`${API_BASE_URL}/conversations/${conversationId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw await res.json();
+  return res.json();
 } 

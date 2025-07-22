@@ -1,6 +1,15 @@
 import React from 'react';
-import { ToolkitConnection, ConnectionStatus } from '../types';
-import { FaGoogle, FaRegCalendarAlt, FaRegStickyNote, FaEnvelope, FaTasks, FaTwitter, FaSlack } from 'react-icons/fa';
+import {
+  FaGoogle,
+  FaCalendarAlt,
+  FaStickyNote,
+  FaSlack,
+  FaEnvelope,
+  FaTasks,
+  FaTwitter,
+  FaSpinner
+} from 'react-icons/fa';
+import { ConnectionStatus, ToolkitConnection } from '../types';
 
 interface ToolkitActionButtonProps {
   slug: string;
@@ -31,47 +40,52 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   let buttonAction = onConnect;
   let buttonDisabled = isConnecting || isSyncing;
   let tooltip = '';
-  let borderColor = 'border-gray-400';
-  let bgColor = 'bg-gray-100';
-  let iconColor = 'text-gray-400';
-  let grayscale = 'grayscale opacity-60';
-  let extraClasses = '';
+  let borderColor = 'border-[#697565]/40';
+  let bgColor = 'bg-[#2A2E24] hover:bg-[#3C3D37]';
+  let iconColor = 'text-[#697565]';
+  let grayscale = 'opacity-60';
+  let extraClasses = 'hover:scale-105 hover:shadow-[0_0_20px_rgba(105,117,101,0.2)]';
+  let iconExtraClasses = '';
 
   if (isActive) {
     buttonAction = () => {};
     buttonDisabled = true;
     tooltip = 'Connected ';
-    borderColor = 'border-green-600';
-    bgColor = 'bg-green-600'; // strong solid green
-    iconColor = 'text-green-600'; // green icon on green button
+    borderColor = 'border-[#8B9A83]';
+    bgColor = 'bg-[#697565]';
+    iconColor = 'text-[#ECDFCC]';
     grayscale = '';
-    extraClasses = 'pointer-events-none';
+    extraClasses = 'pointer-events-none shadow-[0_0_15px_rgba(139,154,131,0.2)]';
+    iconExtraClasses = 'drop-shadow-[0_0_4px_rgba(236,223,204,0.3)]';
   } else if (isPending) {
     buttonAction = onConnect;
     buttonDisabled = isConnecting || isSyncing;
     tooltip = 'Syncing... ';
-    borderColor = 'border-blue-400';
-    bgColor = 'bg-blue-100';
-    iconColor = 'text-blue-400';
+    borderColor = 'border-[#697565]';
+    bgColor = 'bg-[#3C3D37] hover:bg-[#4D5147]';
+    iconColor = 'text-[#D4C5B3]';
     grayscale = '';
+    extraClasses = 'hover:scale-105 hover:shadow-[0_0_20px_rgba(105,117,101,0.3)]';
+    iconExtraClasses = 'drop-shadow-[0_0_4px_rgba(212,197,179,0.3)]';
   } else if (isDisconnected) {
     buttonAction = onConnect;
     buttonDisabled = isConnecting || isSyncing;
     tooltip = 'Connect ';
-    borderColor = 'border-gray-400';
-    bgColor = 'bg-gray-100';
-    iconColor = 'text-gray-400';
-    grayscale = 'grayscale opacity-60';
+    borderColor = 'border-[#697565]/40';
+    bgColor = 'bg-[#2A2E24] hover:bg-[#3C3D37]';
+    iconColor = 'text-[#697565]';
+    grayscale = 'opacity-60';
+    extraClasses = 'hover:scale-105 hover:shadow-[0_0_20px_rgba(105,117,101,0.2)]';
   }
   tooltip += slug.replace('GOOGLE', 'Google ').replace('NOTION', 'Notion').replace('GMAIL', 'Gmail').replace('TASKS', 'Tasks');
 
   const iconMap: Record<string, React.ReactNode> = {
-    GOOGLECALENDAR: <FaRegCalendarAlt size={28} className={iconColor} />,
-    NOTION: <FaRegStickyNote size={28} className={iconColor} />,
-    SLACKBOT: <FaSlack size={28} className={iconColor} />,
-    GMAIL: <FaEnvelope size={28} className={iconColor} />,
-    GOOGLETASKS: <FaTasks size={28} className={iconColor} />,
-    TWITTER: <FaTwitter size={28} className={iconColor} />,
+    GOOGLECALENDAR: <FaCalendarAlt size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
+    NOTION: <FaStickyNote size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
+    SLACKBOT: <FaSlack size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
+    GMAIL: <FaEnvelope size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
+    GOOGLETASKS: <FaTasks size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
+    TWITTER: <FaTwitter size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />,
   };
 
   return (
@@ -80,18 +94,18 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
       onMouseLeave={() => !isActive && onLeave && onLeave()}
     >
       <button
-        className={`relative flex rounded-full items-center justify-center w-14 h-14 border-2 ${borderColor} ${bgColor} mx-1 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150 shadow-lg ${isActive ? '' : 'hover:scale-110 hover:shadow-2xl active:scale-95'} ${grayscale} ${extraClasses}`}
+        className={`relative flex rounded-xl items-center justify-center w-14 h-14 border-2 ${borderColor} ${bgColor} mx-1 focus:outline-none focus:ring-2 focus:ring-[#697565]/60 transition-all duration-300 shadow-lg ${extraClasses} ${grayscale}`}
         onClick={buttonAction}
         disabled={buttonDisabled}
         aria-label={tooltip}
         type="button"
       >
         {isConnecting || isSyncing ? (
-          <span className="animate-spin text-2xl">⏳</span>
+          <FaSpinner className="animate-spin text-2xl text-[#ECDFCC] drop-shadow-[0_0_4px_rgba(236,223,204,0.3)]" size={24} />
         ) : (
-          iconMap[slug] || <FaGoogle size={28} className={iconColor} />
+          iconMap[slug] || <FaGoogle size={24} className={`${iconColor} ${iconExtraClasses} transition-all duration-200`} />
         )}
-        {error && !isActive && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white" />}
+        {error && !isActive && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-[#2A2E24] shadow-[0_0_8px_rgba(239,68,68,0.4)]" />}
       </button>
     </div>
   );

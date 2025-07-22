@@ -3,6 +3,7 @@ import {
   listConversations,
   createConversation as apiCreateConversation,
   deleteConversation as apiDeleteConversation,
+  updateConversationTitle as apiUpdateConversationTitle,
 } from '../api/conversations';
 
 export interface Conversation {
@@ -23,6 +24,7 @@ interface ConversationState {
   createConversation: (title: string) => Promise<void>;
   deleteConversation: (id: number) => Promise<void>;
   selectConversation: (convo: Conversation) => void;
+  updateConversationTitle: (id: number, title: string) => Promise<void>;
 }
 
 export const useConversationStore = create<ConversationState>((set, get) => ({
@@ -88,4 +90,21 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     }
   },
   selectConversation: (convo: Conversation) => set({ selectedConversation: convo }),
+  updateConversationTitle: async (id: number, title: string) => {
+    set({ loading: true, error: null });
+    try {
+      const updated = await apiUpdateConversationTitle(id, title);
+      set((state) => ({
+        conversations: state.conversations.map(c =>
+          c.conversation_id === id ? { ...c, title: updated.title } : c
+        ),
+        selectedConversation: state.selectedConversation && state.selectedConversation.conversation_id === id
+          ? { ...state.selectedConversation, title: updated.title }
+          : state.selectedConversation,
+        loading: false,
+      }));
+    } catch (err: any) {
+      set({ error: err?.detail || 'Failed to update title', loading: false });
+    }
+  },
 })); 
