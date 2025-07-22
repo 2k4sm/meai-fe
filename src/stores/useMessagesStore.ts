@@ -80,14 +80,15 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     function handleAssistant(data: any) {
       set(state => {
         const messages = [...state.messages];
+        const lastMsg = messages[messages.length - 1];
         if (
           messages.length > 0 &&
-          messages[messages.length - 1].type === 'AI' &&
-          state.streaming
+          lastMsg.type === 'AI' &&
+          lastMsg.status === 'pending'
         ) {
           messages[messages.length - 1] = {
-            ...messages[messages.length - 1],
-            content: messages[messages.length - 1].content + data.content,
+            ...lastMsg,
+            content: lastMsg.content + data.content,
           };
         } else {
           messages.push({

@@ -11,6 +11,8 @@ interface ToolkitActionButtonProps {
   onConnect: () => void;
   onEnable: () => void;
   onDisable: () => void;
+  onHover?: (info: { slug: string; connection?: ToolkitConnection; status: ConnectionStatus | undefined; error?: string | null }) => void;
+  onLeave?: () => void;
 }
 
 export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
@@ -22,6 +24,8 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   onConnect,
   onEnable,
   onDisable,
+  onHover,
+  onLeave,
 }) => {
   const status = connection?.connection_status;
   const isActive = status === ConnectionStatus.ACTIVE;
@@ -43,6 +47,14 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
     bgColor = 'bg-green-100';
     iconColor = 'text-green-500';
     grayscale = '';
+  } else if (status === ConnectionStatus.PENDING) {
+    buttonAction = onConnect;
+    buttonDisabled = isConnecting || isSyncing;
+    tooltip = 'Connect ';
+    borderColor = 'border-gray-400';
+    bgColor = 'bg-gray-100';
+    iconColor = 'text-gray-400';
+    grayscale = 'grayscale opacity-60';
   } else if (isFailed) {
     buttonAction = onConnect;
     buttonDisabled = false;
@@ -81,14 +93,16 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   };
 
   return (
-    <div className="relative group">
+    <div className="relative group h-20"
+      onMouseEnter={() => onHover && onHover({ slug, connection, status, error })}
+      onMouseLeave={() => onLeave && onLeave()}
+    >
       <button
-        className={`relative flex items-center justify-center w-14 h-14 border-2 ${borderColor} ${bgColor} mx-1 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150 shadow-lg hover:scale-110 hover:shadow-2xl active:scale-95 ${grayscale}`}
+        className={`relative flex rounded-full items-center justify-center w-14 h-14 border-2 ${borderColor} ${bgColor} mx-1 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150 shadow-lg hover:scale-110 hover:shadow-2xl active:scale-95 ${grayscale}`}
         onClick={buttonAction}
         disabled={buttonDisabled}
         aria-label={tooltip}
         type="button"
-        style={{ borderRadius: '9999px' }}
       >
         {isConnecting || isSyncing ? (
           <span className="animate-spin text-2xl">⏳</span>
@@ -97,9 +111,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
         )}
         {error && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white" />}
       </button>
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto bg-black text-white text-xs rounded px-2 py-1 shadow-lg z-50 whitespace-nowrap transition-opacity duration-200">
-        {tooltip + (error ? `\n${error}` : '')}
-      </div>
     </div>
   );
 }; 

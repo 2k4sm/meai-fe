@@ -63,6 +63,11 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
     try {
       const { connections } = await getConnections();
       set({ connections, error: null });
+      connections.forEach((conn: ToolkitConnection) => {
+        if (conn.connection_status === ConnectionStatus.PENDING) {
+          get().clearPendingConnection(conn.toolkit_slug);
+        }
+      });
     } catch (e: any) {
       set({ error: e.message });
     }
@@ -95,7 +100,7 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
     set(state => ({ syncing: { ...state.syncing, [slug]: true }, error: null }));
     let status: ConnectionStatus | null = null;
     try {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 30; i++) { // Try 30 times
         const res = await syncConnection(connectionRequestId);
         status = res.connection_status as ConnectionStatus;
         if (status === ConnectionStatus.ACTIVE) {
@@ -104,9 +109,16 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
         await new Promise(res => setTimeout(res, 2000));
       }
       await get().fetchConnections();
-      get().clearPendingConnection(slug);
+      // If not ACTIVE after 5 tries, clear pendingConnection for this slug
+      const conn = get().connections.find(c => c.toolkit_slug === slug);
+      if (!conn || conn.connection_status !== ConnectionStatus.ACTIVE) {
+        get().clearPendingConnection(slug);
+      } else {
+        get().clearPendingConnection(slug); // Always clear after success too
+      }
     } catch (e: any) {
       set(state => ({ syncing: { ...state.syncing, [slug]: false }, error: e.message }));
+      get().clearPendingConnection(slug); // Also clear on error
       return;
     }
     set(state => ({

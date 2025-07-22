@@ -4,7 +4,7 @@ import { ToolkitActionButton } from './ToolkitActionButton';
 import { ConnectionStatus } from '../types';
 
 
-export const ToolkitList = () => {
+export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover?: (info: any) => void; onToolkitLeave?: () => void }) => {
   const {
     toolkits,
     connections,
@@ -37,8 +37,8 @@ export const ToolkitList = () => {
   });
 
   return (
-    <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-2 shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 w-full flex flex-col items-center gap-2">
-      <div className="w-full flex flex-row items-center overflow-x-auto p-3">
+    <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-[5px] shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 w-full flex flex-col items-center h-fit" >
+      <div className="w-full flex flex-row items-center overflow-x-auto overflow-visible z-50 h-fit pt-2">
         {toolkits.map((slug) => {
           const connection = connections.find(c => c.toolkit_slug === slug);
           return (
@@ -52,6 +52,8 @@ export const ToolkitList = () => {
               onConnect={() => connectToolkit(slug)}
               onEnable={() => enableToolkit(slug)}
               onDisable={() => disableToolkit(slug)}
+              onHover={onToolkitHover}
+              onLeave={onToolkitLeave}
             />
           );
         })}
@@ -61,6 +63,4 @@ export const ToolkitList = () => {
       )}
     </div>
   );
-
-  
 }; 
