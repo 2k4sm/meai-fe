@@ -19,10 +19,9 @@ const MainLayout: React.FC = () => {
     await createConversation('Untitled');
     const convo = useConversationStore.getState().selectedConversation;
     if (convo) {
+      sendMessage(convo.conversation_id, input);
       await fetchMessages(convo.conversation_id);
       connectStream(convo.conversation_id);
-      sendMessage(convo.conversation_id, input);
-      // Update the conversation title to the first user message
       await updateConversationTitle(convo.conversation_id, input);
     }
   };
