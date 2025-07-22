@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useConversationStore } from '../stores/useConversationStore';
 import { FiTrash2, FiPlus, FiChevronLeft, FiMessageSquare } from 'react-icons/fi';
-import ChatWindow from './ChatWindow';
-import Navbar from './Navbar';
-import { useAuthStore } from '../stores/useAuthStore';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  onConversationSelect: (conversationId: number) => void;
+  selectedConversationId: number | null;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConversationSelect, selectedConversationId }) => {
   const {
     conversations,
-    selectedConversation,
     loading,
     error,
     fetchConversations,
     createConversation,
     deleteConversation,
-    selectConversation,
   } = useConversationStore();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [newTitle, setNewTitle] = useState('');
 
   useEffect(() => {
@@ -33,8 +34,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-full flex bg-gradient-to-br from-gray-900 via-gray-950 to-black relative">
-      {/* Sidebar Overlay */}
+    <div>
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300 opacity-100 block lg:hidden"
@@ -42,7 +42,6 @@ const Sidebar: React.FC = () => {
           aria-label="Close sidebar overlay"
         />
       )}
-      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 z-50 h-screen bg-gray-900/95 transition-all duration-500 ease-in-out
           ${sidebarOpen ? 'translate-x-0 opacity-100 w-full md:w-[60%] lg:w-[20%]' : '-translate-x-full opacity-0 w-0'}
@@ -90,8 +89,8 @@ const Sidebar: React.FC = () => {
               {conversations.map(convo => (
                 <li
                   key={convo.conversation_id}
-                  className={`flex items-center justify-between px-2 py-1 rounded-lg cursor-pointer transition select-none border border-transparent ${selectedConversation?.conversation_id === convo.conversation_id ? 'bg-blue-900/60 border-blue-700' : 'hover:bg-gray-800'}`}
-                  onClick={() => selectConversation(convo)}
+                  className={`flex items-center justify-between px-2 py-1 rounded-lg cursor-pointer transition select-none border border-transparent ${selectedConversationId === convo.conversation_id ? 'bg-blue-900/60 border-blue-700' : 'hover:bg-gray-800'}`}
+                  onClick={() => onConversationSelect(convo.conversation_id)}
                   style={{ minHeight: 36 }}
                 >
                   <span className="truncate flex-1 text-gray-100" title={convo.title || 'Untitled'}>
@@ -111,18 +110,6 @@ const Sidebar: React.FC = () => {
             </ul>
           </div>
         </div>
-      </div>
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-950 to-black transition-all duration-500 ease-in-out relative">
-        {useAuthStore.getState().user && (
-          <Navbar onSidebarToggle={() => setSidebarOpen(true)} />
-        )}
-        {selectedConversation ? (
-          <div className="w-full h-full flex flex-col">
-            <ChatWindow conversationId={selectedConversation.conversation_id} onSidebarToggle={() => setSidebarOpen(true)} />
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-600">Select or create a conversation to start chatting.</div>
-        )}
       </div>
     </div>
   );

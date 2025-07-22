@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuthStore } from './stores/useAuthStore';
 import Login from './components/Login';
-import Sidebar from './components/Sidebar';
+import MainLayout from './components/MainLayout';
 import './App.css';
 
 const App: React.FC = () => {
@@ -9,7 +9,7 @@ const App: React.FC = () => {
 
   if (!user) return <Login />;
 
-  return <Sidebar />;
+  return <MainLayout />;
 };
 
 export default App;

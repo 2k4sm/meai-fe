@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useMessagesStore } from '../stores/useMessagesStore';
 import MessageItem from './MessageItem';
 import InputForm from './InputForm';
+import { ToolkitList } from './ToolkitList';
 
 interface ChatWindowProps {
   conversationId: number;
@@ -44,7 +45,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId }) => {
   };
 
   return (
-    <div className="flex-1 pb-44 bg-gradient-to-r from-gray-900 to-gray-800 shadow-inner">
+    <div className="flex-1 pb-44 bg-gradient-to-r from-gray-900 to-gray-800 shadow-inner relative">
       <div className="p-4 overflow-y-auto h-full">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-300">
@@ -74,6 +75,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId }) => {
             <div ref={messagesEndRef} />
           </div>
         )}
+      </div>
+      <div className="fixed left-1/2 transform -translate-x-1/2 z-40 w-[90%] lg:w-[50%] bottom-[108px] pointer-events-none">
+        <div className="pointer-events-auto">
+          <ToolkitList />
+        </div>
       </div>
       <InputForm onSubmit={handleSend} disabled={streaming} />
     </div>
