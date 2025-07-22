@@ -13,8 +13,6 @@ export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover
     fetchToolkits,
     fetchConnections,
     connectToolkit,
-    enableToolkit,
-    disableToolkit,
     syncConnectionPeriodically,
     pendingConnections,
   } = useToolsStore();
@@ -44,8 +42,6 @@ export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover
               isSyncing={!!syncing[slug]}
               error={error}
               onConnect={() => connectToolkit(slug)}
-              onEnable={() => enableToolkit(slug)}
-              onDisable={() => disableToolkit(slug)}
               onHover={onToolkitHover}
               onLeave={onToolkitLeave}
             />

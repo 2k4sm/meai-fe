@@ -2,8 +2,6 @@ import { create } from 'zustand';
 import {
   getToolkits,
   connectToolkit as apiConnectToolkit,
-  enableToolkit,
-  disableToolkit,
   getConnections,
   getConnectionStatus,
   syncConnection,
@@ -24,8 +22,6 @@ interface ToolsStoreState {
   fetchConnections: () => Promise<void>;
   connectToolkit: (slug: string) => Promise<void>;
   syncConnectionPeriodically: (connectionRequestId: string, slug: string) => Promise<void>;
-  enableToolkit: (slug: string) => Promise<void>;
-  disableToolkit: (slug: string) => Promise<void>;
   getConnectionStatus: (slug: string) => Promise<ToolkitConnection | null>;
   reset: () => void;
 }
@@ -126,30 +122,6 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
       connecting: { ...state.connecting, [slug]: false },
       error: null,
     }));
-  },
-
-  enableToolkit: async (slug: string) => {
-    set(state => ({ syncing: { ...state.syncing, [slug]: true }, error: null }));
-    try {
-      await enableToolkit(slug);
-      await get().fetchConnections();
-      set(() => ({ error: null }));
-    } catch (e: any) {
-      set(() => ({ error: e.message }));
-    }
-    set(state => ({ syncing: { ...state.syncing, [slug]: false } }));
-  },
-
-  disableToolkit: async (slug: string) => {
-    set(state => ({ syncing: { ...state.syncing, [slug]: true }, error: null }));
-    try {
-      await disableToolkit(slug);
-      await get().fetchConnections();
-      set(() => ({ error: null }));
-    } catch (e: any) {
-      set(() => ({ error: e.message }));
-    }
-    set(state => ({ syncing: { ...state.syncing, [slug]: false } }));
   },
 
   getConnectionStatus: async (slug: string) => {

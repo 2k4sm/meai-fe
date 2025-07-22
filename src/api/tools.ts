@@ -15,24 +15,6 @@ export async function connectToolkit(slug: string) {
   return res.json();
 }
 
-export async function enableToolkit(slug: string) {
-  const res = await fetch(`${API_BASE_URL}/toolkits/enable/${slug}`, {
-    method: 'POST',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('Failed to enable toolkit');
-  return res.json();
-}
-
-export async function disableToolkit(slug: string) {
-  const res = await fetch(`${API_BASE_URL}/toolkits/disable/${slug}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('Failed to disable toolkit');
-  return res.json();
-}
-
 export async function getConnections() {
   const res = await fetch(`${API_BASE_URL}/toolkits/connections`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to fetch toolkit connections');
