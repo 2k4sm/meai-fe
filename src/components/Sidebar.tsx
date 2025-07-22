@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useConversationStore } from '../stores/useConversationStore';
-import { FiTrash2, FiPlus, FiChevronLeft, FiMessageSquare } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiChevronLeft } from 'react-icons/fi';
+import { RiMessage3Line } from 'react-icons/ri';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -54,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
         >
           <div className="flex items-center justify-between mb-2 pt-3">
             <h2 className="text-lg font-bold text-blue-400 flex items-center gap-2 sm:text-base">
-              <FiMessageSquare className="inline-block text-blue-400" />
+              <RiMessage3Line className="inline-block text-blue-400" />
               Conversations
             </h2>
             <button className="ml-2 text-gray-400 hover:text-blue-400 focus:ring-2 focus:ring-blue-500 rounded p-1 bg-gray-900/90" onClick={() => setSidebarOpen(false)} title="Collapse sidebar">

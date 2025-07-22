@@ -16,7 +16,7 @@ const Login: React.FC = () => {
             </div>
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white mb-2">meAI</h1>
-              <p className="text-gray-400 text-sm">Your AI-powered chat companion</p>
+              <p className="text-gray-400 text-sm">Your AI-powered personal assistant</p>
             </div>
           </div>
 

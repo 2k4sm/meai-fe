@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { useMessagesStore } from '../stores/useMessagesStore';
 import MessageItem from './MessageItem';
 import InputForm from './InputForm';
-import { ToolkitList } from './ToolkitList';
 
 interface ChatWindowProps {
   conversationId: number | null;
@@ -62,7 +61,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
             </p>
           </div>
         ) : (
-          <div className="flex flex-col space-y-5">
+          <div className="flex flex-col space-y-5 pb-60">
             {messages.map((msg) => (
               <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[50%] mx-auto">
                 <MessageItem message={msg} status={msg.status} />
@@ -86,11 +85,6 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
             <div ref={messagesEndRef} />
           </div>
         )}
-      </div>
-      <div className="fixed left-1/2 transform -translate-x-1/2 z-40 w-[90%] lg:w-[50%] bottom-[108px] pointer-events-none">
-        <div className="pointer-events-auto">
-          <ToolkitList />
-        </div>
       </div>
       <InputForm onSubmit={handleSend} disabled={streaming} />
     </div>

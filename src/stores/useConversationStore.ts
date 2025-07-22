@@ -84,7 +84,6 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       await apiDeleteConversation(id);
       set({ loading: false });
     } catch (err: any) {
-      // Revert on failure
       set({ conversations: prevConvos, selectedConversation: prevSelected, error: err?.detail || 'Failed to delete conversation', loading: false });
     }
   },

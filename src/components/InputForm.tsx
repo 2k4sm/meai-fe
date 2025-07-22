@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiSend } from 'react-icons/fi';
+import { ToolkitList } from './ToolkitList';
 
 const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; disabled: boolean }) => {
   const [input, setInput] = useState('');
@@ -52,7 +53,8 @@ const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; 
 
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] lg:w-[50%] z-50">
-      <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-2 shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10">
+      <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-2 shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 flex flex-col gap-2">
+        <ToolkitList />
         <form onSubmit={handleSubmit} className="flex gap-4 items-end">
           <div className="flex-1 bg-black/15 backdrop-blur-lg rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-black/20">
             <textarea
