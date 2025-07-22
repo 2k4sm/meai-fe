@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import ChatWindow from './ChatWindow';
 import { useConversationStore } from '../stores/useConversationStore';
@@ -28,16 +27,26 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="h-screen w-full flex bg-gradient-to-br from-gray-900 via-gray-950 to-black relative">
+      {!sidebarOpen && (
+        <button
+          className="fixed top-4 left-4 z-30 lg:hidden bg-gray-800/80 text-blue-400 hover:text-white p-2 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      )}
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         onConversationSelect={handleConversationSelect}
         selectedConversationId={selectedConversation?.conversation_id ?? null}
       />
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-950 to-black transition-all duration-500 ease-in-out relative">
-        <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col transition-all duration-500 ease-in-out relative">
         <div className="w-full h-full flex flex-col">
-          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} onCreateAndSendMessage={handleCreateAndSendMessage} />
+          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} onCreateAndSendMessage={handleCreateAndSendMessage} sidebarOpen={sidebarOpen} />
         </div>
       </div>
     </div>

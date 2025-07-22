@@ -72,7 +72,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
     iconColor = 'text-gray-400';
     grayscale = 'grayscale opacity-60';
   } else {
-    // Disconnected or no connection
     buttonAction = onConnect;
     buttonDisabled = isConnecting || isSyncing;
     tooltip = 'Connect ';
@@ -83,7 +82,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   }
   tooltip += slug.replace('GOOGLE', 'Google ').replace('NOTION', 'Notion').replace('GMAIL', 'Gmail').replace('TASKS', 'Tasks');
 
-  // Icon rendering with color
   const iconMap: Record<string, React.ReactNode> = {
     GOOGLECALENDAR: <FaRegCalendarAlt size={28} className={iconColor} />,
     NOTION: <FaRegStickyNote size={28} className={iconColor} />,
@@ -93,7 +91,7 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   };
 
   return (
-    <div className="relative group h-20"
+    <div className="relative group h-15"
       onMouseEnter={() => onHover && onHover({ slug, connection, status, error })}
       onMouseLeave={() => onLeave && onLeave()}
     >

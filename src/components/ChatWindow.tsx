@@ -5,10 +5,9 @@ import InputForm from './InputForm';
 
 interface ChatWindowProps {
   conversationId: number | null;
-  onSidebarToggle?: () => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void }> = ({ conversationId, onCreateAndSendMessage }) => {
+const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void; sidebarOpen?: boolean }> = ({ conversationId, onCreateAndSendMessage, sidebarOpen }) => {
   const {
     messages,
     loading,
@@ -52,7 +51,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
   };
 
   return (
-    <div className="flex-1 pb-44 bg-gradient-to-r from-gray-900 to-gray-800 shadow-inner relative pt-20">
+    <div className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 shadow-inner relative pt-20 w-full h-full lg:w-full lg:h-full">
       <div className="p-4 overflow-y-auto h-full">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-300">
@@ -63,7 +62,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
         ) : (
           <div className="flex flex-col space-y-5 pb-60">
             {messages.map((msg) => (
-              <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[50%] mx-auto">
+              <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[70%] mx-auto">
                 <MessageItem message={msg} status={msg.status} />
               </div>
             ))}
@@ -86,7 +85,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
           </div>
         )}
       </div>
-      <InputForm onSubmit={handleSend} disabled={streaming} />
+      {(!sidebarOpen) && <InputForm onSubmit={handleSend} disabled={streaming} />}
     </div>
   );
 };

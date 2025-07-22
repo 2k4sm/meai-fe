@@ -58,9 +58,6 @@ export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover
           );
         })}
       </div>
-      {anyInactive && (
-        <div className="w-full text-center text-xs text-blue-500 font-semibold pt-1">Authorize tools by clicking on them  to make them available for use.</div>
-      )}
     </div>
   );
 }; 

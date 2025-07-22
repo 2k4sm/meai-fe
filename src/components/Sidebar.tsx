@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useConversationStore } from '../stores/useConversationStore';
-import { FiTrash2, FiPlus, FiChevronLeft } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiChevronLeft, FiLogOut, FiUser } from 'react-icons/fi';
 import { RiMessage3Line } from 'react-icons/ri';
+import { useAuthStore } from '../stores/useAuthStore';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -11,6 +12,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConversationSelect, selectedConversationId }) => {
+  const { user, logout } = useAuthStore();
   const {
     conversations,
     loading,
@@ -35,30 +37,27 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
   };
 
   return (
-    <div>
+    <>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm transition-all duration-300 opacity-100 block lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-all duration-300 block lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close sidebar overlay"
         />
       )}
-      <div
-        className={`fixed top-0 left-0 z-60 h-screen bg-gray-900/95 transition-all duration-500 ease-in-out
-          ${sidebarOpen ? 'translate-x-0 opacity-100 w-full md:w-[60%] lg:w-[20%]' : '-translate-x-full opacity-0 w-0'}
-          lg:fixed lg:top-0 lg:left-0 lg:z-60 lg:h-screen lg:bg-gray-900/95`}
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen bg-gray-900/95 border-r border-gray-800 transition-all duration-500 ease-in-out flex flex-col
+          ${sidebarOpen ? 'translate-x-0 opacity-100 w-4/5 sm:w-2/5 md:w-[40%] md:min-w-[300px] md:max-w-md lg:w-[22%] lg:min-w-[260px] lg:max-w-lg' : '-translate-x-full opacity-0 w-0'}
+          md:w-[40%] md:min-w-[300px] md:max-w-md lg:static lg:translate-x-0 lg:opacity-100 lg:w-[22%] lg:min-w-[260px] lg:max-w-lg`}
         style={{ height: '100vh' }}
       >
-        <div
-          className={`h-full flex flex-col gap-4 shadow-2xl bg-gray-900/90 transition-all duration-500 ease-in-out overflow-hidden ${sidebarOpen ? 'p-4' : 'p-0'} sm:p-3`}
-          style={{ opacity: sidebarOpen ? 1 : 0, pointerEvents: sidebarOpen ? 'auto' : 'none' }}
-        >
+        <div className={`h-full flex flex-col gap-4 shadow-2xl bg-gray-900/90 transition-all duration-500 ease-in-out overflow-hidden p-4`}> 
           <div className="flex items-center justify-between mb-2 pt-3">
-            <h2 className="text-lg font-bold text-blue-400 flex items-center gap-2 sm:text-base">
-              <RiMessage3Line className="inline-block text-blue-400" />
-              Conversations
-            </h2>
-            <button className="ml-2 text-gray-400 hover:text-blue-400 focus:ring-2 focus:ring-blue-500 rounded p-1 bg-gray-900/90" onClick={() => setSidebarOpen(false)} title="Collapse sidebar">
+            <div className="flex items-center gap-4">
+              <RiMessage3Line className="inline-block text-blue-400 w-7 h-7" />
+              <span className="text-2xl font-extrabold text-blue-400 tracking-tight select-none">meAI</span>
+            </div>
+            <button className="ml-2 text-gray-400 hover:text-blue-400 focus:ring-2 focus:ring-blue-500 rounded p-1 bg-gray-900/90 lg:hidden" onClick={() => setSidebarOpen(false)} title="Collapse sidebar">
               <FiChevronLeft size={22} />
             </button>
           </div>
@@ -110,9 +109,26 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
               ))}
             </ul>
           </div>
+          <div className="mt-auto pt-4 border-t border-gray-800 flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-2">
+              <FiUser className="text-gray-400 w-6 h-6" />
+              <div className="flex flex-col">
+                <span className="text-gray-100 text-sm font-semibold">{user?.name || 'User'}</span>
+                <span className="text-gray-400 text-xs">{user?.email || ''}</span>
+              </div>
+            </div>
+            <button
+              className="ml-auto flex items-center gap-1 bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400 transition-colors duration-200 font-semibold shadow"
+              onClick={logout}
+              title="Logout"
+            >
+              <FiLogOut />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 };
 

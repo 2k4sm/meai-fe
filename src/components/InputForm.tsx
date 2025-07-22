@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FiSend } from 'react-icons/fi';
 import { ToolkitList } from './ToolkitList';
 import { ConnectionStatus, ToolkitConnection } from '../types';
+import { useToolsStore } from '../stores/useToolsStore';
 
 const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; disabled: boolean }) => {
   const [input, setInput] = useState('');
@@ -12,6 +13,12 @@ const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; 
     status: ConnectionStatus | undefined;
     error?: string | null;
   } | null>(null);
+
+  const { toolkits, connections } = useToolsStore();
+  const anyInactive = toolkits.some(slug => {
+    const connection = connections.find(c => c.toolkit_slug === slug);
+    return !(connection && connection.connection_status === ConnectionStatus.ACTIVE);
+  });
 
   useEffect(() => {
     if (inputRef.current && !disabled) {
@@ -59,8 +66,8 @@ const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; 
     : 'bg-blue-600/90 hover:bg-blue-700/90';
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] lg:w-[50%] z-[999] overflow-visible">
-      <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-2 shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 flex flex-col gap-2 relative">
+    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-[95%] md:w-[85%] lg:w-[70%] min-w-[260px] max-w-3xl z-40 pointer-events-none flex flex-col items-center justify-center">
+      <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-2 shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 flex flex-col gap-2 relative pointer-events-auto w-full">
         <ToolkitList
           onToolkitHover={setHoveredToolkit}
           onToolkitLeave={() => setHoveredToolkit(null)}
@@ -102,6 +109,9 @@ const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; 
           </button>
         </form>
       </div>
+      {anyInactive && (
+        <div className="w-full text-center text-xs text-blue-500 font-semibold pt-2">Authorize tools by clicking on them to make them available for use.</div>
+      )}
     </div>
   );
 };
