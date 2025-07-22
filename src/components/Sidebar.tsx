@@ -37,15 +37,15 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
     <div>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300 opacity-100 block lg:hidden"
+          className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm transition-all duration-300 opacity-100 block lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close sidebar overlay"
         />
       )}
       <div
-        className={`fixed top-0 left-0 z-50 h-screen bg-gray-900/95 transition-all duration-500 ease-in-out
+        className={`fixed top-0 left-0 z-60 h-screen bg-gray-900/95 transition-all duration-500 ease-in-out
           ${sidebarOpen ? 'translate-x-0 opacity-100 w-full md:w-[60%] lg:w-[20%]' : '-translate-x-full opacity-0 w-0'}
-          lg:fixed lg:top-0 lg:left-0 lg:z-50 lg:h-screen lg:bg-gray-900/95`}
+          lg:fixed lg:top-0 lg:left-0 lg:z-60 lg:h-screen lg:bg-gray-900/95`}
         style={{ height: '100vh' }}
       >
         <div
