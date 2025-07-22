@@ -2,6 +2,9 @@
 
 meAI is a modern, AI-powered personal assistant web app. It features real-time chat, Google authentication, and seamless integration with external toolkits (like Google, Notion, Gmail, and more) to help you manage your digital life—all in a beautiful, responsive interface.
 
+**Backend Repository:** [meAI Frontend](https://github.com/2k4sm/meai-be)
+
+
 ---
 
 ## Features
