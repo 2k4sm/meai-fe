@@ -58,3 +58,50 @@ button:focus,
 button:focus-visible {
   outline: 4px auto #60a5fa;
 }
+
+.markdown-body p,
+.markdown-body ol,
+.markdown-body ul,
+.markdown-body li,
+.markdown-body pre,
+.markdown-body code,
+.markdown-body blockquote,
+.markdown-body table {
+  display: block;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  width: 100%;
+  word-break: break-word;
+}
+
+.markdown-body ol,
+.markdown-body ul {
+  padding-left: 1.5em;
+}
+
+.markdown-body li {
+  margin-bottom: 0.25em;
+}
+
+.markdown-body pre {
+  background: #18181b;
+  color: #e0e0e0;
+  border-radius: 0.5em;
+  padding: 1em;
+  overflow-x: auto;
+}
+
+.markdown-body code {
+  background: #232336;
+  color: #60a5fa;
+  border-radius: 0.3em;
+  padding: 0.2em 0.4em;
+  font-size: 0.95em;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid #60a5fa;
+  padding-left: 1em;
+  color: #a0aec0;
+  background: #18181b;
+}
