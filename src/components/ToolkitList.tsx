@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useToolsStore } from '../stores/useToolsStore';
 import { ToolkitActionButton } from './ToolkitActionButton';
-import { ConnectionStatus } from '../types';
 
 
 export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover?: (info: any) => void; onToolkitLeave?: () => void }) => {
@@ -30,11 +29,6 @@ export const ToolkitList = ({ onToolkitHover, onToolkitLeave }: { onToolkitHover
       syncConnectionPeriodically(connectionRequestId, slug);
     });
   }, [pendingConnections, syncConnectionPeriodically]);
-
-  const anyInactive = toolkits.some(slug => {
-    const connection = connections.find(c => c.toolkit_slug === slug);
-    return !(connection && connection.connection_status === ConnectionStatus.ACTIVE);
-  });
 
   return (
     <div className="bg-black/5 backdrop-blur-xl rounded-3xl p-[5px] shadow-[0_0_14px_rgba(255,255,255,0.2)] border border-black/10 w-full flex flex-col items-center h-fit" >

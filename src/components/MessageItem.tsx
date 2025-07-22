@@ -1,11 +1,7 @@
-import { useEffect, useRef } from "react";
-import { marked } from "marked";
-import DOMPurify from 'dompurify';
-import type { Message } from '../types';
-import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import type { Message } from '../types';
 
 interface MessageItemProps {
   message: Message;

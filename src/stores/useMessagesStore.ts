@@ -10,7 +10,7 @@ interface MessagesState {
   streaming: boolean;
   fetchMessages: (conversationId: number) => Promise<void>;
   deleteMessage: (conversationId: number, messageId: number) => Promise<void>;
-  sendMessage: (content: string) => void;
+  sendMessage: (conversationId: number, content: string) => void;
   connectStream: (conversationId: number) => void;
   disconnectStream: () => void;
   reset: () => void;
@@ -42,8 +42,7 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     }
   },
 
-  sendMessage: (content) => {
-    const conversationId = get().messages[0]?.conversation_id || 0;
+  sendMessage: (conversationId: number, content: string) => {
     const pendingMsg: Message = {
       message_id: -Date.now(),
       conversation_id: conversationId,

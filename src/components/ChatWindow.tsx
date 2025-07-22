@@ -7,7 +7,7 @@ interface ChatWindowProps {
   conversationId: number | null;
 }
 
-const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void; sidebarOpen?: boolean }> = ({ conversationId, onCreateAndSendMessage, sidebarOpen }) => {
+const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void }> = ({ conversationId, onCreateAndSendMessage }) => {
   const {
     messages,
     loading,
@@ -44,7 +44,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
   const handleSend = (input: string) => {
     if (!input.trim() || streaming) return;
     if (conversationId) {
-      sendMessage(input.trim());
+      sendMessage(conversationId, input.trim());
     } else if (onCreateAndSendMessage) {
       onCreateAndSendMessage(input.trim());
     }
@@ -62,7 +62,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
         ) : (
           <div className="flex flex-col space-y-5 pb-60">
             {messages.map((msg) => (
-              <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[85%] lg:w-[70%] mx-auto">
+              <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[75%] lg:w-[50%] mx-auto">
                 <MessageItem message={msg} status={msg.status} />
               </div>
             ))}
@@ -85,7 +85,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
           </div>
         )}
       </div>
-      {(!sidebarOpen) && <InputForm onSubmit={handleSend} disabled={streaming} />}
+      <InputForm onSubmit={handleSend} disabled={streaming} />
     </div>
   );
 };

@@ -47,8 +47,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
       )}
       <aside
         className={`fixed top-0 left-0 z-50 h-screen bg-gray-900/95 border-r border-gray-800 transition-all duration-500 ease-in-out flex flex-col
-          ${sidebarOpen ? 'translate-x-0 opacity-100 w-4/5 sm:w-2/5 md:w-[40%] md:min-w-[300px] md:max-w-md lg:w-[22%] lg:min-w-[260px] lg:max-w-lg' : '-translate-x-full opacity-0 w-0'}
-          md:w-[40%] md:min-w-[300px] md:max-w-md lg:static lg:translate-x-0 lg:opacity-100 lg:w-[22%] lg:min-w-[260px] lg:max-w-lg`}
+          ${sidebarOpen ? 'translate-x-0 opacity-100 w-4/5 sm:w-2/5 md:w-[40%] md:min-w-[320px] md:max-w-md lg:w-[22%] lg:min-w-[300px] lg:max-w-lg' : '-translate-x-full opacity-0 w-0'}
+          md:w-[40%] md:min-w-[320px] md:max-w-md lg:static lg:translate-x-0 lg:opacity-100 lg:w-[22%] lg:min-w-[300px] lg:max-w-lg`}
         style={{ height: '100vh' }}
       >
         <div className={`h-full flex flex-col gap-4 shadow-2xl bg-gray-900/90 transition-all duration-500 ease-in-out overflow-hidden p-4`}> 
@@ -109,22 +109,24 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
               ))}
             </ul>
           </div>
-          <div className="mt-auto pt-4 border-t border-gray-800 flex items-center gap-3 mb-8">
-            <div className="flex items-center gap-2">
-              <FiUser className="text-gray-400 w-6 h-6" />
-              <div className="flex flex-col">
-                <span className="text-gray-100 text-sm font-semibold">{user?.name || 'User'}</span>
-                <span className="text-gray-400 text-xs">{user?.email || ''}</span>
+          <div className="w-full flex-shrink-0 mt-auto">
+            <div className="flex flex-col gap-2 w-full pt-4 border-t border-gray-800">
+              <div className="flex items-center gap-2 w-full">
+                <FiUser className="text-gray-400 w-6 h-6" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-gray-100 text-sm font-semibold truncate">{user?.name || 'User'}</span>
+                  <span className="text-gray-400 text-xs truncate">{user?.email || ''}</span>
+                </div>
               </div>
+              <button
+                className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400 transition-colors duration-200 font-semibold shadow mt-2"
+                onClick={logout}
+                title="Logout"
+              >
+                <FiLogOut />
+                <span className="sm:inline">Logout</span>
+              </button>
             </div>
-            <button
-              className="ml-auto flex items-center gap-1 bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400 transition-colors duration-200 font-semibold shadow"
-              onClick={logout}
-              title="Logout"
-            >
-              <FiLogOut />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
           </div>
         </div>
       </aside>

@@ -21,7 +21,7 @@ const MainLayout: React.FC = () => {
     if (convo) {
       await fetchMessages(convo.conversation_id);
       connectStream(convo.conversation_id);
-      sendMessage(input);
+      sendMessage(convo.conversation_id, input);
     }
   };
 
@@ -46,7 +46,7 @@ const MainLayout: React.FC = () => {
       />
       <div className="flex-1 flex flex-col transition-all duration-500 ease-in-out relative">
         <div className="w-full h-full flex flex-col">
-          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} onCreateAndSendMessage={handleCreateAndSendMessage} sidebarOpen={sidebarOpen} />
+          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} onCreateAndSendMessage={handleCreateAndSendMessage} />
         </div>
       </div>
     </div>
