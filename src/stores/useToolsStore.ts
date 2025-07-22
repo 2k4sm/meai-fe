@@ -121,9 +121,9 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
     try {
       await enableToolkit(slug);
       await get().fetchConnections();
-      set({ error: null });
+      set(() => ({ error: null }));
     } catch (e: any) {
-      set(state => ({ error: e.message }));
+      set(() => ({ error: e.message }));
     }
     set(state => ({ syncing: { ...state.syncing, [slug]: false } }));
   },
@@ -133,9 +133,9 @@ export const useToolsStore = create<ToolsStoreState>((set, get) => ({
     try {
       await disableToolkit(slug);
       await get().fetchConnections();
-      set({ error: null });
+      set(() => ({ error: null }));
     } catch (e: any) {
-      set(state => ({ error: e.message }));
+      set(() => ({ error: e.message }));
     }
     set(state => ({ syncing: { ...state.syncing, [slug]: false } }));
   },

@@ -2,14 +2,6 @@ import React from 'react';
 import { ToolkitConnection, ConnectionStatus } from '../types';
 import { FaGoogle, FaRegCalendarAlt, FaRegStickyNote, FaGoogleDrive, FaEnvelope, FaTasks } from 'react-icons/fa';
 
-const toolkitIcons: Record<string, React.ReactNode> = {
-  GOOGLECALENDAR: <FaRegCalendarAlt size={20} />,
-  NOTION: <FaRegStickyNote size={20} />,
-  GOOGLEDRIVE: <FaGoogleDrive size={20} />,
-  GMAIL: <FaEnvelope size={20} />,
-  GOOGLETASKS: <FaTasks size={20} />,
-};
-
 interface ToolkitActionButtonProps {
   slug: string;
   connection?: ToolkitConnection;
@@ -34,10 +26,7 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   const status = connection?.connection_status;
   const isActive = status === ConnectionStatus.ACTIVE;
   const isFailed = status === ConnectionStatus.FAILED;
-  const isDisconnected = status === ConnectionStatus.DISCONNECTED || !connection;
-  const isPending = status === ConnectionStatus.PENDING;
 
-  let buttonLabel = 'Connect';
   let buttonAction = onConnect;
   let buttonDisabled = isConnecting || isSyncing;
   let tooltip = '';
@@ -47,7 +36,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
   let grayscale = 'grayscale opacity-60';
 
   if (isActive) {
-    buttonLabel = 'Disable';
     buttonAction = onDisable;
     buttonDisabled = isSyncing;
     tooltip = 'Disable ';
@@ -56,7 +44,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
     iconColor = 'text-green-500';
     grayscale = '';
   } else if (isFailed) {
-    buttonLabel = 'Retry';
     buttonAction = onConnect;
     buttonDisabled = false;
     tooltip = 'Retry connection ';
@@ -65,7 +52,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
     iconColor = 'text-red-500';
     grayscale = '';
   } else if (connection && !isActive && !isFailed) {
-    buttonLabel = 'Enable';
     buttonAction = onEnable;
     buttonDisabled = isSyncing;
     tooltip = 'Enable ';
@@ -75,7 +61,6 @@ export const ToolkitActionButton: React.FC<ToolkitActionButtonProps> = ({
     grayscale = 'grayscale opacity-60';
   } else {
     // Disconnected or no connection
-    buttonLabel = 'Connect';
     buttonAction = onConnect;
     buttonDisabled = isConnecting || isSyncing;
     tooltip = 'Connect ';

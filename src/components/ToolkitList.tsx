@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useToolsStore } from '../stores/useToolsStore';
 import { ToolkitActionButton } from './ToolkitActionButton';
 import { ConnectionStatus } from '../types';
@@ -41,7 +41,6 @@ export const ToolkitList = () => {
       <div className="w-full flex flex-row items-center overflow-x-auto p-3">
         {toolkits.map((slug) => {
           const connection = connections.find(c => c.toolkit_slug === slug);
-          const isInactive = !(connection && connection.connection_status === ConnectionStatus.ACTIVE);
           return (
             <ToolkitActionButton
               key={slug}
