@@ -16,6 +16,9 @@ interface MessagesState {
   reset: () => void;
 }
 
+let joinedConversationId: number | null = null;
+let pendingSendQueue: { conversationId: number, content: string }[] = [];
+
 export const useMessagesStore = create<MessagesState>((set, get) => ({
   messages: [],
   loading: false,
@@ -25,8 +28,19 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
   fetchMessages: async (conversationId) => {
     set({ loading: true, error: null });
     try {
-      const messages = await getMessages(conversationId);
-      set({ messages, loading: false });
+      const backendMessages = await getMessages(conversationId);
+      set(state => {
+        const pendingLocals = state.messages.filter(
+          m => m.conversation_id === conversationId && m.status === 'pending' &&
+            !backendMessages.some(
+              bm => bm.content === m.content && bm.type === m.type && bm.created_at === m.created_at
+            )
+        );
+        return {
+          messages: [...backendMessages, ...pendingLocals],
+          loading: false
+        };
+      });
     } catch (err: any) {
       set({ error: err.message || 'Failed to fetch messages', loading: false });
     }
@@ -53,7 +67,11 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       status: 'pending',
     };
     set(state => ({ messages: [...state.messages, pendingMsg], streaming: true }));
-    conversationSocket.sendMessage(content);
+    if (joinedConversationId === conversationId) {
+      conversationSocket.sendMessage(content);
+    } else {
+      pendingSendQueue.push({ conversationId, content });
+    }
   },
 
   connectStream: (conversationId) => {
@@ -152,15 +170,41 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     }
 
     function handleError(err: any) {
-      set({ error: err?.error || 'Socket error', streaming: false });
+      set(state => {
+        const messages = [...state.messages];
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].type === 'Human' && messages[i].status === 'pending') {
+            messages[i].status = 'failed';
+            break;
+          }
+        }
+        return { error: err?.error || 'Socket error', streaming: false, messages };
+      });
     }
 
     function handleJoined(data: any) {
+      joinedConversationId = conversationId;
+      pendingSendQueue = pendingSendQueue.filter(item => {
+        if (item.conversationId === conversationId) {
+          conversationSocket.sendMessage(item.content);
+          return false;
+        }
+        return true;
+      });
       console.log('Joined:', data);
     }
 
     function handleConnectError(err: any) {
-      set({ error: err?.message || 'Socket connect error', streaming: false });
+      set(state => {
+        const messages = [...state.messages];
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].type === 'Human' && messages[i].status === 'pending') {
+            messages[i].status = 'failed';
+            break;
+          }
+        }
+        return { error: err?.message || 'Socket connect error', streaming: false, messages };
+      });
       console.error('Socket connect error:', err);
     }
   },
