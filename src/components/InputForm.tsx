@@ -103,9 +103,9 @@ const InputForm = ({ onSubmit, disabled }: { onSubmit: (input: string) => void; 
           <button
             type="submit"
             disabled={disabled || !input.trim()}
-            className={`h-[60px] w-[60px] ${buttonColor} flex items-center justify-center text-[#ECDFCC] rounded-2xl backdrop-blur-lg border border-[#697565]/40 focus:outline-none focus:ring-2 focus:ring-[#697565]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex-shrink-0 group hover:scale-105 active:scale-95`}
+            className={`h-[60px] w-[60px] ${buttonColor} flex items-center justify-center rounded-2xl backdrop-blur-lg border border-[#697565]/40 focus:outline-none focus:ring-2 focus:ring-[#697565]/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex-shrink-0 group hover:scale-105 active:scale-95`}
           >
-            <FaPaperPlane className="w-5 h-5 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] group-hover:scale-110 group-hover:rotate-12 transition-all duration-200" />
+            <FaPaperPlane className="w-5 h-5 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] text-green-300 group-hover:scale-110 group-hover:rotate-12 transition-all duration-200" />
           </button>
         </form>
       </div>

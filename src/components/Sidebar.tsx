@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
               tabIndex={0}
               style={{ minWidth: 36 }}
             >
-              <FaPlus className="w-4 h-4 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] group-hover:rotate-90 transition-transform duration-200" />
+              <FaPlus className="w-4 h-4 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] text-green-300 group-hover:rotate-90 transition-transform duration-200" />
               <span className="hidden sm:inline">New</span>
             </button>
           </form>
@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
                     tabIndex={0}
                     style={{ minWidth: 32 }}
                   >
-                    <FaTrashAlt className="w-4 h-4 drop-shadow-[0_0_4px_rgba(239,68,68,0.3)] group-hover:rotate-12 transition-transform duration-200" />
+                    <FaTrashAlt className="w-4 h-4 drop-shadow-[0_0_4px_rgba(239,68,68,0.3)] text-red-200 group-hover:rotate-12 transition-transform duration-200" />
                   </button>
                 </li>
               ))}
@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
                 onClick={logout}
                 title="Logout"
               >
-                <FaSignOutAlt className="w-5 h-5 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] group-hover:-translate-x-1 transition-transform duration-200" />
+                <FaSignOutAlt className="w-5 h-5 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] text-red-300 group-hover:-translate-x-1 transition-transform duration-200" />
                 <span className="sm:inline">Logout</span>
               </button>
             </div>
