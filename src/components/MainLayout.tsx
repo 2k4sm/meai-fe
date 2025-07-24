@@ -16,7 +16,7 @@ const MainLayout: React.FC = () => {
   };
 
   const handleCreateAndSendMessage = async (input: string) => {
-    await createConversation('Untitled');
+    await createConversation('New Conversation');
     const convo = useConversationStore.getState().selectedConversation;
     if (convo) {
       connectStream(convo.conversation_id);

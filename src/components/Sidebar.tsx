@@ -105,8 +105,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
                     selectedConversationId === convo.conversation_id 
                     ? 'text-[#ECDFCC] font-medium' 
                     : 'text-[#D4C5B3]'
-                  }`} title={convo.title || 'Untitled'}>
-                    {convo.title || 'Untitled'}
+                  }`} title={convo.title || 'New Conversation'}>
+                    {convo.title || 'New Conversation'}
                   </span>
                   <button
                     className="ml-2 flex-shrink-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 focus:ring-2 focus:ring-red-400/50 rounded-lg p-2 transition-all duration-200 bg-[#2A2E24]/60 hover:shadow-[0_0_10px_rgba(239,68,68,0.2)] group"
