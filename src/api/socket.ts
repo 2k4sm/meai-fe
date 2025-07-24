@@ -13,9 +13,12 @@ class ConversationSocket {
       this.socket = io(SOCKET_URL + NAMESPACE, {
         path: '/socket.io',
         withCredentials: true,
-        transports: ['websocket'],
-        autoConnect: false,
+        autoConnect: true,
         forceNew: true,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
       });
       this.socket.on('connect_error', (err) => {
         console.error('Socket connect error:', err);
