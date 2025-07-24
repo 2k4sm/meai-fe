@@ -7,12 +7,30 @@ import type { Message } from '../types';
 const MarkdownComponents = {
   pre: (props: any) => (
     <div className="w-full max-w-full min-w-0 my-3" >
-      <pre className="w-full max-w-full min-w-0 font-mono text-sm bg-[#232336] text-[#e0e0e0] rounded-xl break-words break-all whitespace-pre-wrap overflow-wrap-anywhere" {...props} />
+      <pre className="w-full max-w-full min-w-0 font-mono text-sm bg-[#3636c2] text-[#e0e0e0] rounded-xl break-words break-all whitespace-pre-wrap overflow-wrap-anywhere" {...props} />
     </div>
   ),
-  code: (props: any) => (
-    <code className="inline font-mono text-[#e0e0e0] bg-[#232336] rounded text-sm align-middle break-words break-all whitespace-pre-wrap overflow-wrap-anywhere" {...props} />
-  ),
+  code: ({inline, children, ...props}: any) => {
+    if (!inline) {
+      return (
+        <div className="w-full max-w-full min-w-0 my-3">
+          <pre className="w-full max-w-full min-w-0 font-mono text-sm bg-[#3535be] text-[#e0e0e0] rounded-xl break-words break-all whitespace-pre-wrap overflow-wrap-anywhere p-4">
+            <ReactMarkdown
+              children={String(children)}
+              rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeSlug]}
+              skipHtml={false}
+              components={MarkdownComponents}
+            />
+          </pre>
+        </div>
+      );
+    }
+    return (
+      <code className="inline font-mono text-[#e0e0e0] bg-[#3535d6] rounded text-sm align-middle break-words break-all whitespace-pre-wrap overflow-wrap-anywhere" {...props}>
+        {children}
+      </code>
+    );
+  },
   table: (props: any) => (
     <div className="w-full overflow-x-auto my-3">
       <table className="w-full table-auto border border-[#3C3D37] bg-[#18181b] text-left text-sm break-words break-all whitespace-pre-wrap overflow-wrap-anywhere">
@@ -40,7 +58,6 @@ const MessageItem = ({ message, status }: MessageItemProps) => {
   const isUser = message.type === 'Human';
   const effectiveStatus = status || message.status;
 
-  // Defensive fallback for malformed markdown
   let markdownContent = message.content || "";
   if (typeof markdownContent !== "string") {
     markdownContent = String(markdownContent);
