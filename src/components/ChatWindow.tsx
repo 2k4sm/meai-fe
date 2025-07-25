@@ -60,7 +60,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
             </p>
           </div>
         ) : (
-          <div className="flex flex-col space-y-5 pb-60">
+          <div className="flex flex-col space-y-5 pb-96">
             {messages.map((msg) => (
               <div key={msg.message_id + '-' + msg.created_at} className="w-[95%] md:w-[75%] lg:w-[50%] mx-auto">
                 <MessageItem message={msg} status={msg.status} />
