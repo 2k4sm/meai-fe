@@ -6,23 +6,41 @@ import { useMessagesStore } from '../stores/useMessagesStore';
 
 const MainLayout: React.FC = () => {
   const { selectedConversation, selectConversation, createConversation, updateConversationTitle } = useConversationStore();
-  const { sendMessage, fetchMessages, connectStream } = useMessagesStore();
+  const { switchConversation, connectionStatus } = useMessagesStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleConversationSelect = (conversationId: number) => {
     const convo = useConversationStore.getState().conversations.find(c => c.conversation_id === conversationId);
-    if (convo) selectConversation(convo);
+    if (convo) {
+      selectConversation(convo);
+    }
     setSidebarOpen(false);
   };
 
   const handleCreateAndSendMessage = async (input: string) => {
-    await createConversation('New Conversation');
-    const convo = useConversationStore.getState().selectedConversation;
-    if (convo) {
-      connectStream(convo.conversation_id);
-      sendMessage(convo.conversation_id, input);
-      await fetchMessages(convo.conversation_id);
-      await updateConversationTitle(convo.conversation_id, input);
+    try {
+      if (connectionStatus === 'failed') {
+        console.error('Cannot create conversation - connection failed');
+        return;
+      }
+
+      await createConversation('New Conversation');
+      const convo = useConversationStore.getState().selectedConversation;
+      if (convo) {
+        switchConversation(convo.conversation_id);
+        
+        setTimeout(() => {
+          useMessagesStore.getState().sendMessage(convo.conversation_id, input);
+        }, 100);
+        
+        const title = input.split(/\s+/).slice(0, 5).join(' ').slice(0, 50);
+        await updateConversationTitle(convo.conversation_id, title);
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      useMessagesStore.setState({ 
+        error: 'Failed to create conversation. Please try again.' 
+      });
     }
   };
 

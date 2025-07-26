@@ -12,10 +12,8 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
     messages,
     loading,
     streaming,
-    fetchMessages,
     sendMessage,
-    connectStream,
-    disconnectStream,
+    switchConversation,
     reset,
   } = useMessagesStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -23,17 +21,11 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
   useEffect(() => {
     if (!conversationId) {
       reset();
-      disconnectStream();
       return;
     }
-    fetchMessages(conversationId);
-    connectStream(conversationId);
-    return () => {
-      disconnectStream();
-      reset();
-    };
-    // eslint-disable-next-line
-  }, [conversationId]);
+    
+    switchConversation(conversationId);
+  }, [conversationId, switchConversation, reset]);
 
   useEffect(() => {
     if (messagesEndRef.current) {

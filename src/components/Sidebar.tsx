@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
                     tabIndex={0}
                     style={{ minWidth: 32 }}
                   >
-                    <FaTrashAlt className="w-4 h-4 drop-shadow-[0_0_4px_rgba(239,68,68,0.3)] text-red-200 group-hover:rotate-12 transition-transform duration-200" />
+                    <FaTrashAlt className="w-4 h-4 drop-shadow-[0_0_4px_rgba(239,68,68,0.3)] text-red-100 group-hover:rotate-12 transition-transform duration-200" />
                   </button>
                 </li>
               ))}
@@ -131,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
                 </div>
               </div>
               <button
-                className="w-full flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-600/80 text-[#ECDFCC] px-4 py-3 rounded-lg focus:ring-2 focus:ring-red-400/50 transition-all duration-200 font-semibold shadow-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] mt-2 group"
+                className="w-full flex items-center justify-center gap-2 bg-red-300/40 hover:bg-red-300/35 text-[#fffefc] px-4 py-3 rounded-lg focus:ring-2 focus:ring-red-400/50 transition-all duration-200 font-semibold shadow-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] mt-2 group"
                 onClick={logout}
                 title="Logout"
               >
