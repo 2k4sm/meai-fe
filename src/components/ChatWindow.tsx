@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useMessagesStore } from '../stores/useMessagesStore';
+import { useConversationStore } from '../stores/useConversationStore';
 import MessageItem from './MessageItem';
 import InputForm from './InputForm';
 
@@ -7,7 +8,7 @@ interface ChatWindowProps {
   conversationId: number | null;
 }
 
-const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void }> = ({ conversationId, onCreateAndSendMessage }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId }) => {
   const {
     messages,
     loading,
@@ -15,7 +16,9 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
     sendMessage,
     switchConversation,
     reset,
+    connectionStatus
   } = useMessagesStore();
+  const { createConversation, selectConversation, updateConversationTitle } = useConversationStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,7 +27,9 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
       return;
     }
     
-    switchConversation(conversationId);
+    switchConversation(conversationId).catch(error => {
+      console.error('Failed to switch conversation:', error);
+    });
   }, [conversationId, switchConversation, reset]);
 
   useEffect(() => {
@@ -33,12 +38,38 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
     }
   }, [messages, streaming]);
 
-  const handleSend = (input: string) => {
+  const isConnecting = connectionStatus === 'connecting';
+
+
+  const handleSend = async (input: string) => {
     if (!input.trim() || streaming) return;
-    if (conversationId) {
-      sendMessage(conversationId, input.trim());
-    } else if (onCreateAndSendMessage) {
-      onCreateAndSendMessage(input.trim());
+
+    try {
+      if (!conversationId) {
+        const realConversation = await createConversation('New Conversation');
+        if (!realConversation) {
+          throw new Error('Failed to create conversation');
+        }
+
+        selectConversation(realConversation);
+        const title = input.split(/\s+/).slice(0, 5).join(' ').slice(0, 50);
+        await updateConversationTitle(realConversation.conversation_id, title);
+        
+        await switchConversation(realConversation.conversation_id);
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        await sendMessage(realConversation.conversation_id, input.trim());
+      } else {
+        const currentConversation = useConversationStore.getState().selectedConversation;
+        if (currentConversation && currentConversation.title === 'New Conversation') {
+          const title = input.split(/\s+/).slice(0, 5).join(' ').slice(0, 50);
+          await updateConversationTitle(conversationId, title);
+        }
+        await sendMessage(conversationId, input.trim());
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -77,7 +108,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
           </div>
         )}
       </div>
-      <InputForm onSubmit={handleSend} disabled={streaming} />
+      <InputForm onSubmit={handleSend} disabled={streaming || isConnecting} />
     </div>
   );
 };

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useConversationStore } from '../stores/useConversationStore';
-import { FaChevronLeft, FaPlus, FaTrashAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { useMessagesStore } from '../stores/useMessagesStore';
+import { FaChevronLeft, FaPlus, FaTrashAlt, FaUser, FaSignOutAlt, FaWifi, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import { RiMessage3Line } from 'react-icons/ri';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -9,32 +10,70 @@ interface SidebarProps {
   setSidebarOpen: (open: boolean) => void;
   onConversationSelect: (conversationId: number) => void;
   selectedConversationId: number | null;
+  onCreateNewConversation?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConversationSelect, selectedConversationId }) => {
+const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConversationSelect, selectedConversationId, onCreateNewConversation }) => {
   const { user, logout } = useAuthStore();
+  const { connectionStatus } = useMessagesStore();
   const {
     conversations,
     loading,
     error,
     fetchConversations,
-    createConversation,
     deleteConversation,
   } = useConversationStore();
-  const [newTitle, setNewTitle] = useState('');
 
   useEffect(() => {
     fetchConversations();
     // eslint-disable-next-line
   }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
-    await createConversation(newTitle.trim());
-    setNewTitle('');
-    setSidebarOpen(true);
+  const handleCreateNew = () => {
+    if (onCreateNewConversation) {
+      onCreateNewConversation();
+    }
+    setSidebarOpen(false);
   };
+
+  const getConnectionStatusInfo = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return {
+          icon: <FaWifi className="w-4 h-4" />,
+          text: 'Connected',
+          color: 'text-green-400',
+          bgColor: 'bg-green-400/20',
+          borderColor: 'border-green-400/30'
+        };
+      case 'connecting':
+        return {
+          icon: <FaSpinner className="w-4 h-4 animate-spin" />,
+          text: 'Connecting...',
+          color: 'text-yellow-400',
+          bgColor: 'bg-yellow-400/20',
+          borderColor: 'border-yellow-400/30'
+        };
+      case 'failed':
+        return {
+          icon: <FaExclamationTriangle className="w-4 h-4" />,
+          text: 'Connection Failed',
+          color: 'text-red-400',
+          bgColor: 'bg-red-400/20',
+          borderColor: 'border-red-400/30'
+        };
+      default:
+        return {
+          icon: <FaWifi className="w-4 h-4" />,
+          text: 'Disconnected',
+          color: 'text-gray-400',
+          bgColor: 'bg-gray-400/20',
+          borderColor: 'border-gray-400/30'
+        };
+    }
+  };
+
+  const connectionInfo = getConnectionStatusInfo();
 
   return (
     <>
@@ -65,26 +104,26 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, onConver
               <FaChevronLeft className="w-5 h-5 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)]" />
             </button>
           </div>
-          <form onSubmit={handleCreate} className="flex gap-2 mb-2 w-full bg-[#3C3D37] rounded-lg p-2 shadow-lg border border-[#697565]/30">
-            <input
-              className="flex-1 px-3 py-2 rounded-lg bg-[#2A2E24] border border-[#697565]/30 text-[#ECDFCC] placeholder-[#697565] focus:outline-none focus:border-[#8B9A83] focus:ring-2 focus:ring-[#697565]/50 transition-all duration-300 ease-in-out min-w-0 text-base sm:text-sm shadow-inner"
-              style={{ minWidth: 0 }}
-              placeholder="New conversation..."
-              value={newTitle}
-              onChange={e => setNewTitle(e.target.value)}
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              className="flex-shrink-0 flex items-center gap-1 bg-[#697565] text-[#ECDFCC] px-4 py-2 rounded-lg hover:bg-[#8B9A83] focus:ring-2 focus:ring-[#8B9A83] transition-all duration-200 font-semibold shadow-lg hover:shadow-[0_0_15px_rgba(139,154,131,0.3)] disabled:opacity-50 disabled:hover:bg-[#697565] group"
-              disabled={loading}
-              tabIndex={0}
-              style={{ minWidth: 36 }}
-            >
-              <FaPlus className="w-4 h-4 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] text-green-300 group-hover:rotate-90 transition-transform duration-200" />
-              <span className="hidden sm:inline">New</span>
-            </button>
-          </form>
+          
+          <div className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${connectionInfo.bgColor} ${connectionInfo.borderColor} shadow-lg`}>
+            <div className={`${connectionInfo.color} drop-shadow-[0_0_4px_rgba(255,255,255,0.1)]`}>
+              {connectionInfo.icon}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#ECDFCC] text-xs font-semibold">Socket Connection</span>
+              <span className={`text-xs ${connectionInfo.color} font-medium`}>{connectionInfo.text}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleCreateNew}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 bg-[#52584E] text-[#ECDFCC] px-4 py-3 rounded-lg hover:bg-[#646F60] focus:ring-2 focus:ring-[#8B9A83] transition-all duration-200 font-semibold shadow-lg hover:shadow-[0_0_15px_rgba(139,154,131,0.3)] disabled:opacity-50 disabled:hover:bg-[#697565] group w-full"
+            title="Create new conversation"
+          >
+            <FaPlus className="w-4 h-4 drop-shadow-[0_0_4px_rgba(236,223,204,0.3)] text-green-300 group-hover:rotate-90 transition-transform duration-200" />
+            <span>New Conversation</span>
+          </button>
           <div className="flex-1 overflow-y-auto">
             {loading && <div className="text-[#D4C5B3]">Loading...</div>}
             {error && <div className="text-red-400">{error}</div>}

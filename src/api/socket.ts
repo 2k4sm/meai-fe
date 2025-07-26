@@ -70,22 +70,7 @@ class ConversationSocket {
     }
   }
 
-  joinConversation(conversationId: number) {
-    if (this.currentConversationId === conversationId && this.socket?.connected) {
-      return;
-    }
-
-    this.currentConversationId = conversationId;
-    
-    if (!this.socket?.connected) {
-      this.connect();
-      return;
-    }
-
-    this.socket.emit('join_conversation', { conversation_id: conversationId });
-  }
-
-  sendMessage(content: string) {
+  async sendMessage(content: string) {
     if (!this.socket?.connected) {
       console.error('Cannot send message - socket not connected');
       return false;
@@ -96,8 +81,58 @@ class ConversationSocket {
       return false;
     }
 
-    this.socket.emit('message', { content });
+    if (!this.isJoined) {
+      try {
+        await this.joinConversation(this.currentConversationId);
+      } catch (error) {
+        console.error('Failed to join conversation:', error);
+        return false;
+      }
+    }
+
+    this.socket.emit('message', { 
+      content,
+      conversation_id: this.currentConversationId 
+    });
     return true;
+  }
+
+  private isJoined = false;
+
+  joinConversation(conversationId: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.currentConversationId === conversationId && this.socket?.connected && this.isJoined) {
+        resolve();
+        return;
+      }
+
+      this.currentConversationId = conversationId;
+      this.isJoined = false;
+      
+      if (!this.socket?.connected) {
+        this.connect();
+        
+        const onConnect = () => {
+          this.socket!.emit('join_conversation', { conversation_id: conversationId });
+        };
+        
+        this.socket!.once('connect', onConnect);
+      } else {
+        this.socket.emit('join_conversation', { conversation_id: conversationId });
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error('Join conversation timeout'));
+      }, 5000);
+
+      const onJoined = () => {
+        clearTimeout(timeout);
+        this.isJoined = true;
+        resolve();
+      };
+
+      this.once('joined', onJoined);
+    });
   }
 
   on(event: string, handler: (data: any) => void) {
@@ -105,6 +140,14 @@ class ConversationSocket {
       this.eventHandlers.set(event, new Set());
     }
     this.eventHandlers.get(event)!.add(handler);
+  }
+
+  once(event: string, handler: (data: any) => void) {
+    const onceHandler = (data: any) => {
+      this.off(event, onceHandler);
+      handler(data);
+    };
+    this.on(event, onceHandler);
   }
 
   off(event: string, handler: (data: any) => void) {
@@ -126,6 +169,11 @@ class ConversationSocket {
 
   getCurrentConversationId(): number | null {
     return this.currentConversationId;
+  }
+
+  clearConversation() {
+    this.currentConversationId = null;
+    this.isJoined = false;
   }
 
   isSocketConnected(): boolean {

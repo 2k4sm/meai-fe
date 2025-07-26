@@ -12,8 +12,8 @@ interface MessagesState {
   connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'failed';
   fetchMessages: (conversationId: number) => Promise<void>;
   deleteMessage: (conversationId: number, messageId: number) => Promise<void>;
-  sendMessage: (conversationId: number, content: string) => void;
-  switchConversation: (conversationId: number) => void;
+  sendMessage: (conversationId: number, content: string) => Promise<void>;
+  switchConversation: (conversationId: number) => Promise<void>;
   reset: () => void;
   retryConnection: () => void;
 }
@@ -54,7 +54,7 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     }
   },
 
-  sendMessage: (conversationId: number, content: string) => {
+  sendMessage: async (conversationId: number, content: string) => {
     const pendingMsg: Message = {
       message_id: -Date.now(),
       conversation_id: conversationId,
@@ -70,13 +70,20 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       streaming: true 
     }));
 
-    const currentSocketConversation = conversationSocket.getCurrentConversationId();
-    if (currentSocketConversation !== conversationId) {
-      conversationSocket.joinConversation(conversationId);
-    }
-
-    const success = conversationSocket.sendMessage(content);
-    if (!success) {
+    try {
+      const success = await conversationSocket.sendMessage(content);
+      if (!success) {
+        useMessagesStore.setState(state => ({
+          messages: state.messages.map(msg => 
+            msg.message_id === pendingMsg.message_id 
+              ? { ...msg, status: 'failed' as const }
+              : msg
+          ),
+          streaming: false
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
       useMessagesStore.setState(state => ({
         messages: state.messages.map(msg => 
           msg.message_id === pendingMsg.message_id 
@@ -88,24 +95,45 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     }
   },
 
-  switchConversation: (conversationId: number) => {
+  switchConversation: async (conversationId: number) => {
     const currentId = get().currentConversationId;
     
     if (currentId === conversationId) return;
 
+    conversationSocket.clearConversation();
+
+    const optimisticMessages = get().messages.filter(msg => 
+      msg.conversation_id === conversationId && msg.status === 'pending'
+    );
+
     useMessagesStore.setState({ 
-      messages: [], 
+      messages: optimisticMessages, 
       currentConversationId: conversationId,
       streaming: false,
-      error: null 
+      error: null,
+      connectionStatus: 'connecting'
     });
 
-    conversationSocket.joinConversation(conversationId);
-    
-    get().fetchMessages(conversationId);
+    if (conversationId > 0) {
+      try {
+        await conversationSocket.joinConversation(conversationId);
+        
+        useMessagesStore.setState({ connectionStatus: 'connected' });
+        
+        await get().fetchMessages(conversationId);
+      } catch (error) {
+        console.error('Failed to switch conversation:', error);
+        useMessagesStore.setState({ 
+          error: 'Failed to connect to conversation',
+          connectionStatus: 'failed'
+        });
+        throw error;
+      }
+    }
   },
 
   reset: () => {
+    conversationSocket.clearConversation();
     useMessagesStore.setState({ 
       messages: [], 
       loading: false, 
