@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useMessagesStore } from '../stores/useMessagesStore';
+import { useConversationStore } from '../stores/useConversationStore';
+import { useSocketConnection } from '../hooks/useSocketConnection';
 import MessageItem from './MessageItem';
 import InputForm from './InputForm';
 
@@ -7,33 +9,29 @@ interface ChatWindowProps {
   conversationId: number | null;
 }
 
-const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: string) => void }> = ({ conversationId, onCreateAndSendMessage }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId }) => {
   const {
     messages,
     loading,
     streaming,
-    fetchMessages,
     sendMessage,
-    connectStream,
-    disconnectStream,
-    reset,
+    switchConversation,
+    reset
   } = useMessagesStore();
+  const { createConversation, selectConversation, updateConversationTitle } = useConversationStore();
+  const { isConnected, connect, isConnecting } = useSocketConnection();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!conversationId) {
       reset();
-      disconnectStream();
       return;
     }
-    fetchMessages(conversationId);
-    connectStream(conversationId);
-    return () => {
-      disconnectStream();
-      reset();
-    };
-    // eslint-disable-next-line
-  }, [conversationId]);
+    
+    switchConversation(conversationId).catch(error => {
+      console.error('Failed to switch conversation:', error);
+    });
+  }, [conversationId, switchConversation, reset]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -41,12 +39,43 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
     }
   }, [messages, streaming]);
 
-  const handleSend = (input: string) => {
+
+  const handleSend = async (input: string) => {
     if (!input.trim() || streaming) return;
-    if (conversationId) {
-      sendMessage(conversationId, input.trim());
-    } else if (onCreateAndSendMessage) {
-      onCreateAndSendMessage(input.trim());
+
+    if (!isConnected) {
+      console.log('Socket not connected, attempting to connect...');
+      const connected = await connect();
+      if (!connected) {
+        console.error('Failed to connect socket, cannot send message');
+        return;
+      }
+    }
+
+    try {
+      if (!conversationId) {
+        const realConversation = await createConversation('New Conversation');
+        if (!realConversation) {
+          throw new Error('Failed to create conversation');
+        }
+
+        selectConversation(realConversation);
+        const title = input.split(/\s+/).slice(0, 5).join(' ').slice(0, 50);
+        await updateConversationTitle(realConversation.conversation_id, title);
+        
+        await switchConversation(realConversation.conversation_id);
+        
+        await sendMessage(realConversation.conversation_id, input.trim());
+      } else {
+        const currentConversation = useConversationStore.getState().selectedConversation;
+        if (currentConversation && currentConversation.title === 'New Conversation') {
+          const title = input.split(/\s+/).slice(0, 5).join(' ').slice(0, 50);
+          await updateConversationTitle(conversationId, title);
+        }
+        await sendMessage(conversationId, input.trim());
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -85,7 +114,7 @@ const ChatWindow: React.FC<ChatWindowProps & { onCreateAndSendMessage?: (input: 
           </div>
         )}
       </div>
-      <InputForm onSubmit={handleSend} disabled={streaming} />
+      <InputForm onSubmit={handleSend} disabled={streaming || isConnecting} />
     </div>
   );
 };

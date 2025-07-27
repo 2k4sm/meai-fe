@@ -21,7 +21,7 @@ interface ConversationState {
   loading: boolean;
   error: string | null;
   fetchConversations: () => Promise<void>;
-  createConversation: (title: string) => Promise<void>;
+  createConversation: (title: string) => Promise<Conversation | null>;
   deleteConversation: (id: number) => Promise<void>;
   selectConversation: (convo: Conversation) => void;
   updateConversationTitle: (id: number, title: string) => Promise<void>;
@@ -64,6 +64,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         selectedConversation: convo,
         loading: false,
       }));
+      return convo;
     } catch (err: any) {
       set((state) => ({
         conversations: state.conversations.filter(c => c.conversation_id !== tempId),
@@ -71,6 +72,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         loading: false,
         selectedConversation: state.selectedConversation?.conversation_id === tempId ? null : state.selectedConversation,
       }));
+      return null;
     }
   },
   deleteConversation: async (id: number) => {

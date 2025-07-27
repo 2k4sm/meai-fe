@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getMe, logout as apiLogout } from '../api/auth';
+import { conversationSocket } from '../api/socket';
 
 export interface User {
   email: string;
@@ -18,9 +19,10 @@ interface AuthState {
   fetchMe: () => Promise<void>;
   logout: () => Promise<void>;
   reset: () => void;
+  isAuthenticated: () => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: false,
   error: null,
@@ -29,6 +31,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const user = await getMe();
       set({ user, loading: false });
+      
+      if (user) {
+        console.log('User authenticated, connecting socket...');
+        try {
+          await conversationSocket.connect();
+          console.log('Socket connected successfully');
+        } catch (error) {
+          console.error('Failed to connect socket after login:', error);
+        }
+      }
     } catch (err: any) {
       set({ user: null, loading: false, error: err?.detail || 'Failed to fetch user' });
     }
@@ -38,9 +50,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await apiLogout();
       set({ user: null, loading: false });
+      
+      console.log('User logged out, disconnecting socket...');
+      conversationSocket.disconnect();
     } catch (err: any) {
       set({ error: err?.detail || 'Logout failed', loading: false });
     }
   },
-  reset: () => set({ user: null, loading: false, error: null }),
+  reset: () => {
+    set({ user: null, loading: false, error: null });
+    conversationSocket.disconnect();
+  },
+  isAuthenticated: (): boolean => {
+    const state = get();
+    return state.user !== null;
+  },
 })); 

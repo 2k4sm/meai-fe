@@ -1,6 +1,6 @@
 import React from 'react';
 import { login } from '../api/auth';
-import { FaGoogle } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 import { RiMessage3Line } from 'react-icons/ri';
 
 const Login: React.FC = () => {
@@ -22,9 +22,9 @@ const Login: React.FC = () => {
 
           <button
             onClick={login}
-            className="w-full flex items-center justify-center gap-4 px-4 py-2.5 bg-[#2A2E24] hover:bg-[#3C3D37] rounded-xl text-[#ECDFCC] transition-all duration-300 border border-[#697565]/30 hover:border-[#697565] shadow-lg hover:shadow-[0_0_25px_rgba(105,117,101,0.2)] group relative overflow-hidden"
+            className="w-full flex items-center justify-center gap-4 px-4 py-2.5 bg-[#52584E] hover:bg-[#646F60] rounded-xl text-[#e2ded7] transition-all duration-300 border border-[#697565]/30 hover:border-[#697565] shadow-lg hover:shadow-[0_0_25px_rgba(105,117,101,0.2)] group relative overflow-hidden"
           >
-            <FaGoogle className="text-xl text-blue-400 group-hover:text-blue-300" />
+            <FcGoogle className="text-xl" />
             <span>Sign in with Google</span>
           </button>
         </div>

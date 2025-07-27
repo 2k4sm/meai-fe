@@ -5,24 +5,29 @@ import { useConversationStore } from '../stores/useConversationStore';
 import { useMessagesStore } from '../stores/useMessagesStore';
 
 const MainLayout: React.FC = () => {
-  const { selectedConversation, selectConversation, createConversation, updateConversationTitle } = useConversationStore();
-  const { sendMessage, fetchMessages, connectStream } = useMessagesStore();
+  const { selectedConversation, selectConversation, createConversation } = useConversationStore();
+  const { switchConversation } = useMessagesStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleConversationSelect = (conversationId: number) => {
     const convo = useConversationStore.getState().conversations.find(c => c.conversation_id === conversationId);
-    if (convo) selectConversation(convo);
+    if (convo) {
+      selectConversation(convo);
+    }
     setSidebarOpen(false);
   };
 
-  const handleCreateAndSendMessage = async (input: string) => {
-    await createConversation('New Conversation');
-    const convo = useConversationStore.getState().selectedConversation;
-    if (convo) {
-      connectStream(convo.conversation_id);
-      sendMessage(convo.conversation_id, input);
-      await fetchMessages(convo.conversation_id);
-      await updateConversationTitle(convo.conversation_id, input);
+  const handleCreateNewConversation = async () => {
+    try {
+      const realConversation = await createConversation('New Conversation');
+      if (realConversation) {
+        await switchConversation(realConversation.conversation_id);
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+      useMessagesStore.setState({ 
+        error: 'Failed to create conversation. Please try again.' 
+      });
     }
   };
 
@@ -44,10 +49,11 @@ const MainLayout: React.FC = () => {
         setSidebarOpen={setSidebarOpen}
         onConversationSelect={handleConversationSelect}
         selectedConversationId={selectedConversation?.conversation_id ?? null}
+        onCreateNewConversation={handleCreateNewConversation}
       />
       <div className="flex-1 flex flex-col transition-all duration-500 ease-in-out relative">
         <div className="w-full h-full flex flex-col">
-          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} onCreateAndSendMessage={handleCreateAndSendMessage} />
+          <ChatWindow conversationId={selectedConversation?.conversation_id ?? null} />
         </div>
       </div>
     </div>

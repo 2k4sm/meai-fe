@@ -8,36 +8,31 @@ interface MessagesState {
   loading: boolean;
   error: string | null;
   streaming: boolean;
+  currentConversationId: number | null;
   fetchMessages: (conversationId: number) => Promise<void>;
   deleteMessage: (conversationId: number, messageId: number) => Promise<void>;
-  sendMessage: (conversationId: number, content: string) => void;
-  connectStream: (conversationId: number) => void;
-  disconnectStream: () => void;
+  sendMessage: (conversationId: number, content: string) => Promise<void>;
+  switchConversation: (conversationId: number) => Promise<void>;
   reset: () => void;
 }
-
-let joinedConversationId: number | null = null;
-let pendingSendQueue: { conversationId: number, content: string }[] = [];
 
 export const useMessagesStore = create<MessagesState>((set, get) => ({
   messages: [],
   loading: false,
   error: null,
   streaming: false,
+  currentConversationId: null,
 
   fetchMessages: async (conversationId) => {
     set({ loading: true, error: null });
     try {
       const backendMessages = await getMessages(conversationId);
       set(state => {
-        const pendingLocals = state.messages.filter(
-          m => m.conversation_id === conversationId && m.status === 'pending' &&
-            !backendMessages.some(
-              bm => bm.content === m.content && bm.type === m.type && bm.created_at === m.created_at
-            )
+        const pendingMessages = state.messages.filter(
+          m => m.conversation_id === conversationId && m.status === 'pending'
         );
         return {
-          messages: [...backendMessages, ...pendingLocals],
+          messages: [...backendMessages, ...pendingMessages],
           loading: false
         };
       });
@@ -48,15 +43,15 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
 
   deleteMessage: async (conversationId, messageId) => {
     const prevMessages = get().messages;
-    set(state => ({ messages: state.messages.filter(m => m.message_id !== messageId) }));
+    useMessagesStore.setState(state => ({ messages: state.messages.filter(m => m.message_id !== messageId) }));
     try {
       await apiDeleteMessage(conversationId, messageId);
     } catch (err: any) {
-      set({ messages: prevMessages, error: err.message || 'Failed to delete message' });
+      useMessagesStore.setState({ messages: prevMessages, error: err.message || 'Failed to delete message' });
     }
   },
 
-  sendMessage: (conversationId: number, content: string) => {
+  sendMessage: async (conversationId: number, content: string) => {
     const pendingMsg: Message = {
       message_id: -Date.now(),
       conversation_id: conversationId,
@@ -66,156 +61,165 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       created_at: new Date().toISOString(),
       status: 'pending',
     };
-    set(state => ({ messages: [...state.messages, pendingMsg], streaming: true }));
-    if (joinedConversationId === conversationId) {
-      conversationSocket.sendMessage(content);
-    } else {
-      pendingSendQueue.push({ conversationId, content });
+
+    useMessagesStore.setState(state => ({ 
+      messages: [...state.messages, pendingMsg], 
+      streaming: true 
+    }));
+
+    try {
+      const success = await conversationSocket.sendMessage(content);
+      if (!success) {
+        useMessagesStore.setState(state => ({
+          messages: state.messages.map(msg => 
+            msg.message_id === pendingMsg.message_id 
+              ? { ...msg, status: 'failed' as const }
+              : msg
+          ),
+          streaming: false
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      useMessagesStore.setState(state => ({
+        messages: state.messages.map(msg => 
+          msg.message_id === pendingMsg.message_id 
+            ? { ...msg, status: 'failed' as const }
+            : msg
+        ),
+        streaming: false
+      }));
     }
   },
 
-  connectStream: (conversationId) => {
-    get().disconnectStream();
-    conversationSocket.connect();
-    conversationSocket.joinConversation(conversationId);
-    set({ streaming: false });
+  switchConversation: async (conversationId: number) => {
+    const currentId = get().currentConversationId;
+    
+    if (currentId === conversationId) return;
 
-    conversationSocket.off('assistant', handleAssistant);
-    conversationSocket.off('tool', handleTool);
-    conversationSocket.off('last_chunk', handleLastChunk);
-    conversationSocket.off('error', handleError);
-    conversationSocket.off('joined', handleJoined);
-    conversationSocket.off('connect_error', handleConnectError);
+    conversationSocket.clearConversation();
 
-    conversationSocket.on('assistant', handleAssistant);
-    conversationSocket.on('tool', handleTool);
-    conversationSocket.on('last_chunk', handleLastChunk);
-    conversationSocket.on('error', handleError);
-    conversationSocket.on('joined', handleJoined);
-    conversationSocket.on('connect_error', handleConnectError);
+    const optimisticMessages = get().messages.filter(msg => 
+      msg.conversation_id === conversationId && msg.status === 'pending'
+    );
 
-    function handleAssistant(data: any) {
-      set(state => {
-        const messages = [...state.messages];
-        const lastMsg = messages[messages.length - 1];
-        if (
-          messages.length > 0 &&
-          lastMsg.type === 'AI' &&
-          lastMsg.status === 'pending'
-        ) {
-          messages[messages.length - 1] = {
-            ...lastMsg,
-            content: lastMsg.content + data.content,
-          };
-        } else {
-          messages.push({
-            message_id: Date.now(),
-            conversation_id: conversationId,
-            user_id: 0,
-            type: 'AI',
-            content: data.content,
-            created_at: new Date().toISOString(),
-            status: 'pending',
-          });
-        }
-        return { messages };
-      });
+    useMessagesStore.setState({ 
+      messages: optimisticMessages, 
+      currentConversationId: conversationId,
+      streaming: false,
+      error: null
+    });
+
+    if (conversationId > 0) {
+      try {
+        await conversationSocket.joinConversation(conversationId);
+        
+        await get().fetchMessages(conversationId);
+      } catch (error) {
+        console.error('Failed to switch conversation:', error);
+        useMessagesStore.setState({ 
+          error: 'Failed to connect to conversation'
+        });
+        throw error;
+      }
     }
-
-
-    function handleTool(data: any) {
-      set(state => {
-        const messages = [...state.messages];
-        if (
-          messages.length > 0 &&
-          messages[messages.length - 1].type === 'TOOL' &&
-          state.streaming
-        ) {
-          messages[messages.length - 1] = {
-            ...messages[messages.length - 1],
-            content: messages[messages.length - 1].content + data.content,
-          };
-        } else {
-          messages.push({
-            message_id: Date.now(),
-            conversation_id: conversationId,
-            user_id: 0,
-            type: 'TOOL',
-            content: data.content,
-            created_at: new Date().toISOString(),
-          });
-        }
-        return { messages };
-      });
-    }
-
-    function handleLastChunk() {
-      set(state => {
-        const messages = [...state.messages];
-        if (
-          messages.length > 0 &&
-          messages[messages.length - 1].type === 'AI' &&
-          messages[messages.length - 1].status === 'pending'
-        ) {
-          delete messages[messages.length - 1].status;
-        }
-        for (let i = messages.length - 1; i >= 0; i--) {
-          if (messages[i].type === 'Human' && messages[i].status === 'pending') {
-            delete messages[i].status;
-            break;
-          }
-        }
-        return { messages, streaming: false };
-      });
-    }
-
-    function handleError(err: any) {
-      set(state => {
-        const messages = [...state.messages];
-        for (let i = messages.length - 1; i >= 0; i--) {
-          if (messages[i].type === 'Human' && messages[i].status === 'pending') {
-            messages[i].status = 'failed';
-            break;
-          }
-        }
-        return { error: err?.error || 'Socket error', streaming: false, messages };
-      });
-    }
-
-    function handleJoined(data: any) {
-      joinedConversationId = conversationId;
-      pendingSendQueue = pendingSendQueue.filter(item => {
-        if (item.conversationId === conversationId) {
-          conversationSocket.sendMessage(item.content);
-          return false;
-        }
-        return true;
-      });
-      console.log('Joined:', data);
-    }
-
-    function handleConnectError(err: any) {
-      set(state => {
-        const messages = [...state.messages];
-        for (let i = messages.length - 1; i >= 0; i--) {
-          if (messages[i].type === 'Human' && messages[i].status === 'pending') {
-            messages[i].status = 'failed';
-            break;
-          }
-        }
-        return { error: err?.message || 'Socket connect error', streaming: false, messages };
-      });
-      console.error('Socket connect error:', err);
-    }
-  },
-
-  disconnectStream: () => {
-    conversationSocket.disconnect();
-    set({ streaming: false });
   },
 
   reset: () => {
-    get().disconnectStream();
-    set({ messages: [], loading: false, error: null, streaming: false });
+    conversationSocket.clearConversation();
+    useMessagesStore.setState({ 
+      messages: [], 
+      loading: false, 
+      error: null, 
+      streaming: false,
+      currentConversationId: null
+    });
   },
-})); 
+}));
+
+conversationSocket.on('disconnect', () => {
+  useMessagesStore.setState({ 
+    streaming: false 
+  });
+});
+
+conversationSocket.on('assistant', (data) => {
+  useMessagesStore.setState(state => {
+    const messages = [...state.messages];
+    const lastMsg = messages[messages.length - 1];
+    
+    if (lastMsg?.type === 'AI' && lastMsg.status === 'pending') {
+      messages[messages.length - 1] = {
+        ...lastMsg,
+        content: lastMsg.content + data.content,
+      };
+    } else {
+      messages.push({
+        message_id: Date.now(),
+        conversation_id: state.currentConversationId!,
+        user_id: 0,
+        type: 'AI',
+        content: data.content,
+        created_at: new Date().toISOString(),
+        status: 'pending',
+      });
+    }
+    return { messages };
+  });
+});
+
+conversationSocket.on('tool', (data) => {
+  useMessagesStore.setState(state => {
+    const messages = [...state.messages];
+    const lastMsg = messages[messages.length - 1];
+    
+    if (lastMsg?.type === 'TOOL' && state.streaming) {
+      messages[messages.length - 1] = {
+        ...lastMsg,
+        content: lastMsg.content + data.content,
+      };
+    } else {
+      messages.push({
+        message_id: Date.now(),
+        conversation_id: state.currentConversationId!,
+        user_id: 0,
+        type: 'TOOL',
+        content: data.content,
+        created_at: new Date().toISOString(),
+      });
+    }
+    return { messages };
+  });
+});
+
+conversationSocket.on('last_chunk', () => {
+  useMessagesStore.setState(state => {
+    const messages = [...state.messages];
+    
+    messages.forEach(msg => {
+      if (msg.status === 'pending') {
+        delete msg.status;
+      }
+    });
+    
+    return { messages, streaming: false };
+  });
+});
+
+conversationSocket.on('error', (data) => {
+  useMessagesStore.setState(state => {
+    const messages = [...state.messages];    
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].type === 'Human' && messages[i].status === 'pending') {
+        messages[i].status = 'failed';
+        break;
+      }
+    }
+    
+    return { 
+      messages,
+      error: data?.error || 'Socket error', 
+      streaming: false
+    };
+  });
+});
